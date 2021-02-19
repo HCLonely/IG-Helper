@@ -1,0 +1,32 @@
+{
+  "name": "ig-helper",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "./node_modules/.bin/babel IG-Add2Lib.js -o IG-Add2Lib.user.js"
+  },
+  "author": "HCLonely",
+  "license": "MIT",
+  "devDependencies": {
+    "@babel/cli": "^7.12.17",
+    "@babel/core": "^7.12.17",
+    "@babel/plugin-transform-runtime": "^7.12.17",
+    "@babel/preset-env": "^7.12.17",
+    "standard": "^16.0.3"
+  },
+  "standard": {
+    "global": [
+      "$",
+      "TM_request",
+      "Swal",
+      "MutationObserver",
+      "unsafeWindow",
+      "GM_addStyle"
+    ],
+    "ignore":[
+      "IG-Add2Lib.user.js"
+    ]
+  }
+}

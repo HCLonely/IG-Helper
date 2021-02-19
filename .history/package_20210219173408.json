@@ -1,0 +1,20 @@
+{
+  "name": "ig-helper",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "HCLonely",
+  "license": "MIT",
+  "devDependencies": {
+    "standard": "^16.0.3"
+  },
+  "standard":{
+    "global":[
+      "$",
+      "TM_request"
+    ]
+  }
+}
