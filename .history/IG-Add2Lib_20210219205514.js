@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name               IG-Add2Lib
 // @namespace          IG-Add2Lib
-// @version            1.0.2
+// @version            1.0.1
 // @description        indiegala 快速领取免费游戏
 // @author             HCLonely
 // @license            MIT
@@ -26,7 +26,6 @@
 // @run-at             document-end
 // ==/UserScript==
 
-/* global addToIndiegalaLibrary */
 (function () {
   addButton()
   const observer = new MutationObserver(addButton)
@@ -38,18 +37,17 @@
   })
   function addButton () {
     for (const el of $('a[href*=".indiegala.com/"]:not(".id-add2lib")')) {
-      const $this = $(el).addClass('id-add2lib')
+      const $this = $(el)
       const href = $this.attr('href')
       if (/^https?:\/\/[\w\d]+?\.indiegala\.com\/.+$/.test(href)) {
-        $this.after(`<a class="add-to-library" href="javascript:void(0)" onclick="addToIndiegalaLibrary(this)" data-href="${href}" target="_self">入库</a>`)
+        $this.after(`<a class="add-to-library" href="javascript:void(0)" onclick="addToIndiegalaLibrary(this)" data-href="${href}" target="_self">入库</a>`).addClass('id-add2lib')
       }
     }
   }
-  unsafeWindow.addToIndiegalaLibrary = async function (el) {
+  unsafeWindow.addToIndiegalaLibrary = async function addToIndiegalaLibrary (el) {
     const href = typeof el === 'string' ? el : $(el).attr('data-href')
     Swal.fire({
       title: '正在获取入库链接...',
-      text: href,
       icon: 'info'
     })
     const url = await TM_request({
@@ -76,19 +74,16 @@
         return null
       })
     if (!url) {
-      Swal.update({
+      return Swal.update({
         title: '获取入库链接失败！',
-        text: href,
         icon: 'error'
       })
-      return null
     }
     Swal.update({
       title: '正在入库...',
-      text: href,
       icon: 'info'
     })
-    return TM_request({
+    TM_request({
       url,
       method: 'POST',
       responseType: 'json',
@@ -103,32 +98,25 @@
         if (response.response?.status === 'ok') {
           Swal.update({
             title: '入库成功！',
-            text: href,
             icon: 'success'
           })
-          return true
         } else if (response.response?.status === 'added') {
           Swal.update({
             title: '已在库中！',
-            text: href,
             icon: 'warning'
           })
-          return true
         } else if (response.response?.status === 'login') {
           Swal.fire({
             title: '请先登录！',
             icon: 'error',
             html: '<a href="https://www.indiegala.com/login" target="_blank">登录</a>'
           })
-          return false
         } else {
           console.error(response)
           Swal.update({
             title: '入库失败！',
-            text: href,
             icon: 'error'
           })
-          return null
         }
       })
   }
@@ -137,26 +125,8 @@
       return $(e).attr('data-href')
     })
     const newLinks = [...new Set(links)]
-    const failedLinks = []
     for (const link of newLinks) {
-      const result = await addToIndiegalaLibrary(link)
-      if (result === false) {
-        break
-      } else if (!result) {
-        failedLinks.push(`<a href="${link}" target=_blank">${link}</a>`)
-      }
-    }
-    if (failedLinks.length === 0) {
-      Swal.fire({
-        title: '全部任务完成！',
-        icon: 'success'
-      })
-    } else {
-      Swal.fire({
-        title: '以下任务未完成！',
-        icon: 'warning',
-        html: failedLinks.join('<br/>')
-      })
+      await addToIndiegalaLibrary(link)
     }
   })
   GM_addStyle('.add-to-library{margin-left:10px;}')

@@ -1,13 +1,5 @@
 "use strict";
 
-function _toConsumableArray(arr) { return _arrayWithoutHoles(arr) || _iterableToArray(arr) || _unsupportedIterableToArray(arr) || _nonIterableSpread(); }
-
-function _nonIterableSpread() { throw new TypeError("Invalid attempt to spread non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); }
-
-function _iterableToArray(iter) { if (typeof Symbol !== "undefined" && Symbol.iterator in Object(iter)) return Array.from(iter); }
-
-function _arrayWithoutHoles(arr) { if (Array.isArray(arr)) return _arrayLikeToArray(arr); }
-
 function asyncGeneratorStep(gen, resolve, reject, _next, _throw, key, arg) { try { var info = gen[key](arg); var value = info.value; } catch (error) { reject(error); return; } if (info.done) { resolve(value); } else { Promise.resolve(value).then(_next, _throw); } }
 
 function _asyncToGenerator(fn) { return function () { var self = this, args = arguments; return new Promise(function (resolve, reject) { var gen = fn.apply(self, args); function _next(value) { asyncGeneratorStep(gen, resolve, reject, _next, _throw, "next", value); } function _throw(err) { asyncGeneratorStep(gen, resolve, reject, _next, _throw, "throw", err); } _next(undefined); }); }; }
@@ -21,7 +13,7 @@ function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len 
 // ==UserScript==
 // @name               IG-Add2Lib
 // @namespace          IG-Add2Lib
-// @version            1.0.2
+// @version            1.0.1
 // @description        indiegala 快速领取免费游戏
 // @author             HCLonely
 // @license            MIT
@@ -33,7 +25,6 @@ function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len 
 // @include            *://keylol.com/*
 // @grant              GM_addStyle
 // @grant              GM_xmlhttpRequest
-// @grant              GM_registerMenuCommand
 // @grant              unsafeWindow
 // @require            https://cdn.jsdelivr.net/npm/jquery@3.4.1/dist/jquery.slim.min.js
 // @require            https://cdn.jsdelivr.net/npm/sweetalert2@9
@@ -42,8 +33,6 @@ function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len 
 // @connect            indiegala.com
 // @run-at             document-end
 // ==/UserScript==
-
-/* global addToIndiegalaLibrary */
 (function () {
   addButton();
   var observer = new MutationObserver(addButton);
@@ -61,12 +50,8 @@ function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len 
     try {
       for (_iterator.s(); !(_step = _iterator.n()).done;) {
         var el = _step.value;
-        var $this = $(el).addClass('id-add2lib');
-        var href = $this.attr('href');
-
-        if (/^https?:\/\/[\w\d]+?\.indiegala\.com\/.+$/.test(href)) {
-          $this.after("<a class=\"add-to-library\" href=\"javascript:void(0)\" onclick=\"addToIndiegalaLibrary(this)\" data-href=\"".concat(href, "\" target=\"_self\">\u5165\u5E93</a>"));
-        }
+        var $this = $(el);
+        $this.after("<a class=\"add-to-library\" href=\"javascript:void(0)\" onclick=\"addToIndiegalaLibrary(this)\" data-href=\"".concat($this.attr('href'), "\" target=\"_self\">\u5165\u5E93</a>")).addClass('id-add2lib');
       }
     } catch (err) {
       _iterator.e(err);
@@ -82,10 +67,9 @@ function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len 
         while (1) {
           switch (_context.prev = _context.next) {
             case 0:
-              href = typeof el === 'string' ? el : $(el).attr('data-href');
+              href = $(el).attr('data-href');
               Swal.fire({
                 title: '正在获取入库链接...',
-                text: href,
                 icon: 'info'
               });
               _context.next = 4;
@@ -120,24 +104,21 @@ function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len 
               url = _context.sent;
 
               if (url) {
-                _context.next = 8;
+                _context.next = 7;
                 break;
               }
 
-              Swal.update({
+              return _context.abrupt("return", Swal.update({
                 title: '获取入库链接失败！',
-                text: href,
                 icon: 'error'
-              });
-              return _context.abrupt("return", null);
+              }));
 
-            case 8:
+            case 7:
               Swal.update({
                 title: '正在入库...',
-                text: href,
                 icon: 'info'
               });
-              return _context.abrupt("return", TM_request({
+              TM_request({
                 url: url,
                 method: 'POST',
                 responseType: 'json',
@@ -153,36 +134,29 @@ function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len 
                 if (((_response$response = response.response) === null || _response$response === void 0 ? void 0 : _response$response.status) === 'ok') {
                   Swal.update({
                     title: '入库成功！',
-                    text: href,
                     icon: 'success'
                   });
-                  return true;
                 } else if (((_response$response2 = response.response) === null || _response$response2 === void 0 ? void 0 : _response$response2.status) === 'added') {
                   Swal.update({
                     title: '已在库中！',
-                    text: href,
                     icon: 'warning'
                   });
-                  return true;
                 } else if (((_response$response3 = response.response) === null || _response$response3 === void 0 ? void 0 : _response$response3.status) === 'login') {
                   Swal.fire({
                     title: '请先登录！',
                     icon: 'error',
                     html: '<a href="https://www.indiegala.com/login" target="_blank">登录</a>'
                   });
-                  return false;
                 } else {
                   console.error(response);
                   Swal.update({
                     title: '入库失败！',
-                    text: href,
                     icon: 'error'
                   });
-                  return null;
                 }
-              }));
+              });
 
-            case 10:
+            case 9:
             case "end":
               return _context.stop();
           }
@@ -195,89 +169,5 @@ function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len 
     };
   }();
 
-  GM_registerMenuCommand('入库所有', /*#__PURE__*/_asyncToGenerator( /*#__PURE__*/regeneratorRuntime.mark(function _callee2() {
-    var links, newLinks, failedLinks, _iterator2, _step2, link, result;
-
-    return regeneratorRuntime.wrap(function _callee2$(_context2) {
-      while (1) {
-        switch (_context2.prev = _context2.next) {
-          case 0:
-            links = $.makeArray($('a.add-to-library')).map(function (e, i) {
-              return $(e).attr('data-href');
-            });
-            newLinks = _toConsumableArray(new Set(links));
-            failedLinks = [];
-            _iterator2 = _createForOfIteratorHelper(newLinks);
-            _context2.prev = 4;
-
-            _iterator2.s();
-
-          case 6:
-            if ((_step2 = _iterator2.n()).done) {
-              _context2.next = 18;
-              break;
-            }
-
-            link = _step2.value;
-            _context2.next = 10;
-            return addToIndiegalaLibrary(link);
-
-          case 10:
-            result = _context2.sent;
-
-            if (!(result === false)) {
-              _context2.next = 15;
-              break;
-            }
-
-            return _context2.abrupt("break", 18);
-
-          case 15:
-            if (!result) {
-              failedLinks.push("<a href=\"".concat(link, "\" target=_blank\">").concat(link, "</a>"));
-            }
-
-          case 16:
-            _context2.next = 6;
-            break;
-
-          case 18:
-            _context2.next = 23;
-            break;
-
-          case 20:
-            _context2.prev = 20;
-            _context2.t0 = _context2["catch"](4);
-
-            _iterator2.e(_context2.t0);
-
-          case 23:
-            _context2.prev = 23;
-
-            _iterator2.f();
-
-            return _context2.finish(23);
-
-          case 26:
-            if (failedLinks.length === 0) {
-              Swal.fire({
-                title: '全部任务完成！',
-                icon: 'success'
-              });
-            } else {
-              Swal.fire({
-                title: '以下任务未完成！',
-                icon: 'warning',
-                html: failedLinks.join('<br/>')
-              });
-            }
-
-          case 27:
-          case "end":
-            return _context2.stop();
-        }
-      }
-    }, _callee2, null, [[4, 20, 23, 26]]);
-  })));
   GM_addStyle('.add-to-library{margin-left:10px;}');
 })();
