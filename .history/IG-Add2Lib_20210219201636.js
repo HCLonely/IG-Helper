@@ -50,8 +50,7 @@
       url: href,
       method: 'GET',
       timeout: 30000,
-      retry: 3,
-      cookie: 'incap_ses_896_255598='
+      retry: 3
     })
       .then(response => {
         if (!response.responseText) {

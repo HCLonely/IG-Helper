@@ -13,7 +13,7 @@ function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len 
 // ==UserScript==
 // @name               IG-Add2Lib
 // @namespace          IG-Add2Lib
-// @version            1.0.0
+// @version            1.0.1
 // @description        indiegala 快速领取免费游戏
 // @author             HCLonely
 // @license            MIT
@@ -77,17 +77,14 @@ function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len 
                 url: href,
                 method: 'GET',
                 timeout: 30000,
-                retry: 3
+                retry: 3,
+                cookie: 'incap_ses_896_255598='
               }).then(function (response) {
                 var _response$responseTex;
 
                 if (!response.responseText) {
                   console.error(response);
                   return null;
-                }
-
-                if (response.responseText.includes('https://www.indiegala.com/login')) {
-                  return 0;
                 }
 
                 var matchUrl = (_response$responseTex = response.responseText.match(/var[\s]*?url[\s]*?=[\s]*?'(\/ajax\/add-to-library\/.*?\/.*?\/freebies)';/)) === null || _response$responseTex === void 0 ? void 0 : _response$responseTex[1];
@@ -107,28 +104,16 @@ function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len 
               url = _context.sent;
 
               if (url) {
-                _context.next = 11;
+                _context.next = 7;
                 break;
               }
 
-              if (!(url === 0)) {
-                _context.next = 10;
-                break;
-              }
-
-              return _context.abrupt("return", Swal.fire({
-                title: '请先登录！',
-                icon: 'error',
-                html: '<a href="https://www.indiegala.com/login" target="_blank">登录</a>'
-              }));
-
-            case 10:
               return _context.abrupt("return", Swal.update({
                 title: '获取入库链接失败！',
                 icon: 'error'
               }));
 
-            case 11:
+            case 7:
               Swal.update({
                 title: '正在入库...',
                 icon: 'info'
@@ -142,7 +127,8 @@ function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len 
                   'content-type': 'application/json'
                 },
                 timeout: 30000,
-                retry: 3
+                retry: 3,
+                cookie: 'incap_ses_896_255598='
               }).then(function (response) {
                 var _response$response, _response$response2, _response$response3;
 
@@ -171,7 +157,7 @@ function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len 
                 }
               });
 
-            case 13:
+            case 9:
             case "end":
               return _context.stop();
           }

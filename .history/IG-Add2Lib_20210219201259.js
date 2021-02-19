@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name               IG-Add2Lib
 // @namespace          IG-Add2Lib
-// @version            1.0.1
+// @version            1.0.0
 // @description        indiegala 快速领取免费游戏
 // @author             HCLonely
 // @license            MIT
@@ -50,8 +50,7 @@
       url: href,
       method: 'GET',
       timeout: 30000,
-      retry: 3,
-      cookie: 'incap_ses_896_255598='
+      retry: 3
     })
       .then(response => {
         if (!response.responseText) {
@@ -88,8 +87,7 @@
         'content-type': 'application/json'
       },
       timeout: 30000,
-      retry: 3,
-      cookie: 'incap_ses_896_255598='
+      retry: 3
     })
       .then(response => {
         if (response.response?.status === 'ok') {
