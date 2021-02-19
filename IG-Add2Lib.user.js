@@ -20,8 +20,8 @@ function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len 
 // @iconURL            https://auto-task-test.hclonely.com/img/favicon.ico
 // @homepage           https://github.com/HCLonely/IG-Add2Lib/
 // @supportURL         https://github.com/HCLonely/IG-Add2Lib/issues/
-// @updateURL          https://github.com/HCLonely/IG-Add2Lib/issues/new/choose
-// @downloadURL        https://github.com/HCLonely/IG-Add2Lib/issues/new/choose
+// @updateURL          https://raw.githubusercontent.com/HCLonely/IG-Add2Lib/master/IG-Add2Lib.user.js
+// @downloadURL        https://raw.githubusercontent.com/HCLonely/IG-Add2Lib/master/IG-Add2Lib.user.js
 // @include            *://keylol.com/*
 // @grant              GM_addStyle
 // @grant              GM_xmlhttpRequest
