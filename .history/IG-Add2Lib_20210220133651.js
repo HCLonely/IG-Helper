@@ -27,13 +27,21 @@
 // @noframes
 // ==/UserScript==
 
-/* global addToIndiegalaLibrary, syncIgLib */
+/* global addToIndiegalaLibrary, syncIgLib, checkIgOwned */
 (function () {
+  addButton()
+  const observer = new MutationObserver(addButton)
+  observer.observe(document.documentElement, {
+    attributes: true,
+    characterData: true,
+    childList: true,
+    subtree: true
+  })
   function addButton () {
     for (const el of $('a[href*=".indiegala.com/"]:not(".ig-add2lib")')) {
       const $this = $(el).addClass('ig-add2lib')
       const href = $this.attr('href')
-      if (/^https?:\/\/.+?\.indiegala\.com\/.+$/.test(href)) {
+      if (/^https?:\/\/[\w\d]+?\.indiegala\.com\/.+$/.test(href)) {
         $this.after(`<a class="add-to-library" href="javascript:void(0)" onclick="addToIndiegalaLibrary(this)" data-href="${href}" target="_self">入库</a>`)
       }
     }
@@ -99,16 +107,8 @@
             text: href,
             icon: 'success'
           })
-          if (syncIgLib) {
-            syncIgLib(false, false).then(allGames => {
-              for (const el of $('a[href*=".indiegala.com/"]')) {
-                const $this = $(el).addClass('ig-checked')
-                const href = $this.attr('href')
-                if (/^https?:\/\/[\w\d]+?\.indiegala\.com\/.+$/.test(href) && allGames.includes(new URL(href).pathname.replace(/\//g, ''))) {
-                  $this.addClass('ig-owned')
-                }
-              }
-            })
+          if (syncIgLib && checkIgOwned) {
+            syncIgLib(false, false).then(() => { checkIgOwned() })
           }
           return true
         } else if (response.response?.status === 'added') {
@@ -138,8 +138,8 @@
   }
   GM_registerMenuCommand('入库所有', async () => {
     const links = $.makeArray($('a.add-to-library')).map((e, i) => {
-      return $(e).prev().hasClass('ig-owned') ? null : $(e).attr('data-href')
-    }).filter(e => e)
+      return $(e).attr('data-href')
+    })
     const newLinks = [...new Set(links)]
     const failedLinks = []
     for (const link of newLinks) {
@@ -164,12 +164,4 @@
     }
   })
   GM_addStyle('.add-to-library{margin-left:10px;}')
-  addButton()
-  const observer = new MutationObserver(addButton)
-  observer.observe(document.documentElement, {
-    attributes: true,
-    characterData: true,
-    childList: true,
-    subtree: true
-  })
 })()

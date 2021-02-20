@@ -33,7 +33,7 @@
     for (const el of $('a[href*=".indiegala.com/"]:not(".ig-add2lib")')) {
       const $this = $(el).addClass('ig-add2lib')
       const href = $this.attr('href')
-      if (/^https?:\/\/.+?\.indiegala\.com\/.+$/.test(href)) {
+      if (/^https?:\/\/[\w\d]+?\.indiegala\.com\/.+$/.test(href)) {
         $this.after(`<a class="add-to-library" href="javascript:void(0)" onclick="addToIndiegalaLibrary(this)" data-href="${href}" target="_self">入库</a>`)
       }
     }
@@ -138,8 +138,8 @@
   }
   GM_registerMenuCommand('入库所有', async () => {
     const links = $.makeArray($('a.add-to-library')).map((e, i) => {
-      return $(e).prev().hasClass('ig-owned') ? null : $(e).attr('data-href')
-    }).filter(e => e)
+      return $(e).attr('data-href')
+    })
     const newLinks = [...new Set(links)]
     const failedLinks = []
     for (const link of newLinks) {

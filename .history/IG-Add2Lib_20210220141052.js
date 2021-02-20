@@ -138,8 +138,8 @@
   }
   GM_registerMenuCommand('入库所有', async () => {
     const links = $.makeArray($('a.add-to-library')).map((e, i) => {
-      return $(e).prev().hasClass('ig-owned') ? null : $(e).attr('data-href')
-    }).filter(e => e)
+      return $(e).attr('data-href')
+    })
     const newLinks = [...new Set(links)]
     const failedLinks = []
     for (const link of newLinks) {

@@ -29,7 +29,7 @@
       "GM_getValue"
     ],
     "ignore":[
-      "*.user.js"
+      "IG-Add2Lib.user.js"
     ]
   }
 }

@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "build": "babel IG-Add2Lib.js -o IG-Add2Lib.user.js && babel IG-Owned.js -o IG-Owned.user.js"
+    "build": "./node_modules/.bin/babel IG-Add2Lib.js -o IG-Add2Lib.user.js"
   },
   "author": "HCLonely",
   "license": "MIT",
@@ -29,7 +29,7 @@
       "GM_getValue"
     ],
     "ignore":[
-      "*.user.js"
+      "IG-Add2Lib.user.js"
     ]
   }
 }

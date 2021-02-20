@@ -21,15 +21,15 @@ function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len 
 // ==UserScript==
 // @name               IG-Add2Lib
 // @namespace          IG-Add2Lib
-// @version            1.0.2
+// @version            1.0.3
 // @description        indiegala 快速领取免费游戏
 // @author             HCLonely
 // @license            MIT
 // @iconURL            https://auto-task-test.hclonely.com/img/favicon.ico
-// @homepage           https://github.com/HCLonely/IG-Add2Lib/
-// @supportURL         https://github.com/HCLonely/IG-Add2Lib/issues/
-// @updateURL          https://raw.githubusercontent.com/HCLonely/IG-Add2Lib/master/IG-Add2Lib.user.js
-// @downloadURL        https://raw.githubusercontent.com/HCLonely/IG-Add2Lib/master/IG-Add2Lib.user.js
+// @homepage           https://github.com/HCLonely/IG-Helper/
+// @supportURL         https://github.com/HCLonely/IG-Helper/issues/
+// @updateURL          https://raw.githubusercontent.com/HCLonely/IG-Helper/master/IG-Add2Lib.user.js
+// @downloadURL        https://raw.githubusercontent.com/HCLonely/IG-Helper/master/IG-Add2Lib.user.js
 // @include            *://keylol.com/*
 // @grant              GM_addStyle
 // @grant              GM_xmlhttpRequest
@@ -41,30 +41,22 @@ function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len 
 // @require            https://greasyfork.org/scripts/418102-tm-request/code/TM_request.js?version=902218
 // @connect            indiegala.com
 // @run-at             document-end
+// @noframes
 // ==/UserScript==
 
-/* global addToIndiegalaLibrary */
+/* global addToIndiegalaLibrary, syncIgLib */
 (function () {
-  addButton();
-  var observer = new MutationObserver(addButton);
-  observer.observe(document.documentElement, {
-    attributes: true,
-    characterData: true,
-    childList: true,
-    subtree: true
-  });
-
   function addButton() {
-    var _iterator = _createForOfIteratorHelper($('a[href*=".indiegala.com/"]:not(".id-add2lib")')),
+    var _iterator = _createForOfIteratorHelper($('a[href*=".indiegala.com/"]:not(".ig-add2lib")')),
         _step;
 
     try {
       for (_iterator.s(); !(_step = _iterator.n()).done;) {
         var el = _step.value;
-        var $this = $(el).addClass('id-add2lib');
+        var $this = $(el).addClass('ig-add2lib');
         var href = $this.attr('href');
 
-        if (/^https?:\/\/[\w\d]+?\.indiegala\.com\/.+$/.test(href)) {
+        if (/^https?:\/\/.+?\.indiegala\.com\/.+$/.test(href)) {
           $this.after("<a class=\"add-to-library\" href=\"javascript:void(0)\" onclick=\"addToIndiegalaLibrary(this)\" data-href=\"".concat(href, "\" target=\"_self\">\u5165\u5E93</a>"));
         }
       }
@@ -92,9 +84,9 @@ function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len 
               return TM_request({
                 url: href,
                 method: 'GET',
+                anonymous: true,
                 timeout: 30000,
-                retry: 3,
-                cookie: 'incap_ses_896_255598='
+                retry: 3
               }).then(function (response) {
                 var _response$responseTex;
 
@@ -110,7 +102,7 @@ function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len 
                   return null;
                 }
 
-                return new URL("/ajax/add-to-library/".concat(pageId, "/").concat(new URL(href).pathname.replace('/', ''), "/").concat(new URL(href).hostname.replace('.indiegala.com', '')), href).href;
+                return new URL("/ajax/add-to-library/".concat(pageId, "/").concat(new URL(href).pathname.replace(/\//g, ''), "/").concat(new URL(href).hostname.replace('.indiegala.com', '')), href).href;
               })["catch"](function (error) {
                 console.error(error);
                 return null;
@@ -156,6 +148,31 @@ function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len 
                     text: href,
                     icon: 'success'
                   });
+
+                  if (syncIgLib) {
+                    syncIgLib(false, false).then(function (allGames) {
+                      var _iterator2 = _createForOfIteratorHelper($('a[href*=".indiegala.com/"]')),
+                          _step2;
+
+                      try {
+                        for (_iterator2.s(); !(_step2 = _iterator2.n()).done;) {
+                          var _el = _step2.value;
+                          var $this = $(_el).addClass('ig-checked');
+
+                          var _href = $this.attr('href');
+
+                          if (/^https?:\/\/[\w\d]+?\.indiegala\.com\/.+$/.test(_href) && allGames.includes(new URL(_href).pathname.replace(/\//g, ''))) {
+                            $this.addClass('ig-owned');
+                          }
+                        }
+                      } catch (err) {
+                        _iterator2.e(err);
+                      } finally {
+                        _iterator2.f();
+                      }
+                    });
+                  }
+
                   return true;
                 } else if (((_response$response2 = response.response) === null || _response$response2 === void 0 ? void 0 : _response$response2.status) === 'added') {
                   Swal.update({
@@ -196,29 +213,31 @@ function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len 
   }();
 
   GM_registerMenuCommand('入库所有', /*#__PURE__*/_asyncToGenerator( /*#__PURE__*/regeneratorRuntime.mark(function _callee2() {
-    var links, newLinks, failedLinks, _iterator2, _step2, link, result;
+    var links, newLinks, failedLinks, _iterator3, _step3, link, result;
 
     return regeneratorRuntime.wrap(function _callee2$(_context2) {
       while (1) {
         switch (_context2.prev = _context2.next) {
           case 0:
             links = $.makeArray($('a.add-to-library')).map(function (e, i) {
-              return $(e).attr('data-href');
+              return $(e).prev().hasClass('ig-owned') ? null : $(e).attr('data-href');
+            }).filter(function (e) {
+              return e;
             });
             newLinks = _toConsumableArray(new Set(links));
             failedLinks = [];
-            _iterator2 = _createForOfIteratorHelper(newLinks);
+            _iterator3 = _createForOfIteratorHelper(newLinks);
             _context2.prev = 4;
 
-            _iterator2.s();
+            _iterator3.s();
 
           case 6:
-            if ((_step2 = _iterator2.n()).done) {
+            if ((_step3 = _iterator3.n()).done) {
               _context2.next = 18;
               break;
             }
 
-            link = _step2.value;
+            link = _step3.value;
             _context2.next = 10;
             return addToIndiegalaLibrary(link);
 
@@ -249,12 +268,12 @@ function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len 
             _context2.prev = 20;
             _context2.t0 = _context2["catch"](4);
 
-            _iterator2.e(_context2.t0);
+            _iterator3.e(_context2.t0);
 
           case 23:
             _context2.prev = 23;
 
-            _iterator2.f();
+            _iterator3.f();
 
             return _context2.finish(23);
 
@@ -280,4 +299,12 @@ function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len 
     }, _callee2, null, [[4, 20, 23, 26]]);
   })));
   GM_addStyle('.add-to-library{margin-left:10px;}');
+  addButton();
+  var observer = new MutationObserver(addButton);
+  observer.observe(document.documentElement, {
+    attributes: true,
+    characterData: true,
+    childList: true,
+    subtree: true
+  });
 })();

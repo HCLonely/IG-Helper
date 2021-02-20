@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name               IG-Add2Lib
 // @namespace          IG-Add2Lib
-// @version            1.0.3
+// @version            1.0.2
 // @description        indiegala 快速领取免费游戏
 // @author             HCLonely
 // @license            MIT
@@ -24,16 +24,23 @@
 // @require            https://greasyfork.org/scripts/418102-tm-request/code/TM_request.js?version=902218
 // @connect            indiegala.com
 // @run-at             document-end
-// @noframes
 // ==/UserScript==
 
-/* global addToIndiegalaLibrary, syncIgLib */
+/* global addToIndiegalaLibrary */
 (function () {
+  addButton()
+  const observer = new MutationObserver(addButton)
+  observer.observe(document.documentElement, {
+    attributes: true,
+    characterData: true,
+    childList: true,
+    subtree: true
+  })
   function addButton () {
-    for (const el of $('a[href*=".indiegala.com/"]:not(".ig-add2lib")')) {
-      const $this = $(el).addClass('ig-add2lib')
+    for (const el of $('a[href*=".indiegala.com/"]:not(".id-add2lib")')) {
+      const $this = $(el).addClass('id-add2lib')
       const href = $this.attr('href')
-      if (/^https?:\/\/.+?\.indiegala\.com\/.+$/.test(href)) {
+      if (/^https?:\/\/[\w\d]+?\.indiegala\.com\/.+$/.test(href)) {
         $this.after(`<a class="add-to-library" href="javascript:void(0)" onclick="addToIndiegalaLibrary(this)" data-href="${href}" target="_self">入库</a>`)
       }
     }
@@ -48,9 +55,9 @@
     const url = await TM_request({
       url: href,
       method: 'GET',
-      anonymous: true,
       timeout: 30000,
-      retry: 3
+      retry: 3,
+      cookie: 'incap_ses_896_255598='
     })
       .then(response => {
         if (!response.responseText) {
@@ -62,7 +69,7 @@
           console.error(response)
           return null
         }
-        return new URL(`/ajax/add-to-library/${pageId}/${new URL(href).pathname.replace(/\//g, '')}/${new URL(href).hostname.replace('.indiegala.com', '')}`, href).href
+        return new URL(`/ajax/add-to-library/${pageId}/${new URL(href).pathname.replace('/', '')}/${new URL(href).hostname.replace('.indiegala.com', '')}`, href).href
       })
       .catch(error => {
         console.error(error)
@@ -99,17 +106,6 @@
             text: href,
             icon: 'success'
           })
-          if (syncIgLib) {
-            syncIgLib(false, false).then(allGames => {
-              for (const el of $('a[href*=".indiegala.com/"]')) {
-                const $this = $(el).addClass('ig-checked')
-                const href = $this.attr('href')
-                if (/^https?:\/\/[\w\d]+?\.indiegala\.com\/.+$/.test(href) && allGames.includes(new URL(href).pathname.replace(/\//g, ''))) {
-                  $this.addClass('ig-owned')
-                }
-              }
-            })
-          }
           return true
         } else if (response.response?.status === 'added') {
           Swal.update({
@@ -138,8 +134,8 @@
   }
   GM_registerMenuCommand('入库所有', async () => {
     const links = $.makeArray($('a.add-to-library')).map((e, i) => {
-      return $(e).prev().hasClass('ig-owned') ? null : $(e).attr('data-href')
-    }).filter(e => e)
+      return $(e).attr('data-href')
+    })
     const newLinks = [...new Set(links)]
     const failedLinks = []
     for (const link of newLinks) {
@@ -164,12 +160,4 @@
     }
   })
   GM_addStyle('.add-to-library{margin-left:10px;}')
-  addButton()
-  const observer = new MutationObserver(addButton)
-  observer.observe(document.documentElement, {
-    attributes: true,
-    characterData: true,
-    childList: true,
-    subtree: true
-  })
 })()
