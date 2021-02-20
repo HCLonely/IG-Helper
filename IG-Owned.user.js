@@ -29,7 +29,7 @@ function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len 
 // ==UserScript==
 // @name               IG-Owned
 // @namespace          IG-Owned
-// @version            1.0.0
+// @version            1.0.1
 // @description        indiegala 检测游戏是否已拥有
 // @author             HCLonely
 // @license            MIT
@@ -218,9 +218,9 @@ function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len 
         var pages = 1;
 
         if (page === 1) {
-          var _$$find$attr$match;
+          var _$$find$attr, _$$find$attr$match;
 
-          var lastPageNum = parseInt((_$$find$attr$match = $(response.responseText).find('a.profile-private-page-library-pagination-item[href*="library/showcase"]:has(.fa-angle-double-right)').attr('href').match(/[\d]+/)) === null || _$$find$attr$match === void 0 ? void 0 : _$$find$attr$match[0]);
+          var lastPageNum = parseInt((_$$find$attr = $(response.responseText).find('a.profile-private-page-library-pagination-item[href*="library/showcase"]:has(.fa-angle-double-right)').attr('href')) === null || _$$find$attr === void 0 ? void 0 : (_$$find$attr$match = _$$find$attr.match(/[\d]+/)) === null || _$$find$attr$match === void 0 ? void 0 : _$$find$attr$match[0]);
 
           if (!isNaN(lastPageNum)) {
             pages = lastPageNum;

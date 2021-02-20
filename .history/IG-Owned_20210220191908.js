@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name               IG-Owned
 // @namespace          IG-Owned
-// @version            1.0.1
+// @version            1.0.0
 // @description        indiegala 检测游戏是否已拥有
 // @author             HCLonely
 // @license            MIT
@@ -94,7 +94,7 @@
         if (response.status === 200) {
           let pages = 1
           if (page === 1) {
-            const lastPageNum = parseInt($(response.responseText).find('a.profile-private-page-library-pagination-item[href*="library/showcase"]:has(.fa-angle-double-right)').attr('href')?.match(/[\d]+/)?.[0])
+            const lastPageNum = parseInt($(response.responseText).find('a.profile-private-page-library-pagination-item[href*="library/showcase"]:has(.fa-angle-double-right)').attr('href').match(/[\d]+/)?.[0])
             if (!isNaN(lastPageNum)) {
               pages = lastPageNum
             }

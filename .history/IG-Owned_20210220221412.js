@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name               IG-Owned
 // @namespace          IG-Owned
-// @version            1.0.1
+// @version            1.0.0
 // @description        indiegala 检测游戏是否已拥有
 // @author             HCLonely
 // @license            MIT
