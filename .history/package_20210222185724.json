@@ -30,7 +30,7 @@
       "GM_setValue",
       "GM_getValue"
     ],
-    "ignore": [
+    "ignore":[
       "*.user.js"
     ]
   }

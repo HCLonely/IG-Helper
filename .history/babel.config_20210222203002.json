@@ -1,0 +1,19 @@
+{
+  "presets": [
+    [
+      "@babel/preset-env",
+      {
+        "useBuiltIns": "entry",
+        "corejs": "3.9.0"
+      }
+    ]
+  ],
+  "plugins": [
+    [
+      "polyfill-es-shims",
+      {
+        "method": "usage-global"
+      }
+    ]
+  ]
+}

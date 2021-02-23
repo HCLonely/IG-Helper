@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name               IG-Owned
 // @namespace          IG-Owned
-// @version            1.0.2
+// @version            1.0.1
 // @description        indiegala 检测游戏是否已拥有
 // @author             HCLonely
 // @license            MIT
@@ -23,7 +23,6 @@
 // @grant              window.open
 
 // @require            https://cdn.jsdelivr.net/npm/jquery@3.4.1/dist/jquery.slim.min.js
-// @require            https://cdn.jsdelivr.net/npm/regenerator-runtime@0.13.7/runtime.min.js
 // @require            https://cdn.jsdelivr.net/npm/sweetalert2@9
 // @require            https://cdn.jsdelivr.net/npm/promise-polyfill@8.1.3/dist/polyfill.min.js
 // @require            https://greasyfork.org/scripts/418102-tm-request/code/TM_request.js?version=902218
@@ -93,15 +92,14 @@
           return [0, []]
         }
         if (response.status === 200) {
-          const html = $(response.responseText)
           let pages = 1
           if (page === 1) {
-            const lastPageNum = parseInt(html.find('a.profile-private-page-library-pagination-item[href*="library/showcase"]:has(.fa-angle-double-right)').attr('href')?.match(/[\d]+/)?.[0])
+            const lastPageNum = parseInt($(response.responseText).find('a.profile-private-page-library-pagination-item[href*="library/showcase"]:has(.fa-angle-double-right)').attr('href')?.match(/[\d]+/)?.[0])
             if (!isNaN(lastPageNum)) {
               pages = lastPageNum
             }
           }
-          const games = [...$.makeArray(html.find('a.library-showcase-title')).map(e => $(e).attr('href')?.match(/https:\/\/.*?\.indiegala\.com\/(.*)/)?.[1]?.toLowerCase())].filter(e => e)
+          const games = [...response.responseText.matchAll(/<a class="library-showcase-title" href="https:\/\/.*?\.indiegala\.com\/(.*?)" target="_blank">/g)].map(e => e[1].toLowerCase()).filter(e => e)
           return [pages, games]
         } else {
           console.error(response)
