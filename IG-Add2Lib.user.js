@@ -21,7 +21,7 @@ function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len 
 // ==UserScript==
 // @name               IG-Add2Lib
 // @namespace          IG-Add2Lib
-// @version            1.0.5
+// @version            1.0.6
 // @description        indiegala 快速领取免费游戏
 // @author             HCLonely
 // @license            MIT
@@ -186,7 +186,15 @@ function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len 
                   Swal.fire({
                     title: '请先登录！',
                     icon: 'error',
-                    html: '<a href="https://www.indiegala.com/login" target="_blank">登录</a>'
+                    showCancelButton: true,
+                    confirmButtonText: '登录',
+                    cancelButtonText: '关闭'
+                  }).then(function (_ref2) {
+                    var value = _ref2.value;
+
+                    if (value) {
+                      window.open('https://www.indiegala.com/login', '_blank');
+                    }
                   });
                   return false;
                 } else {

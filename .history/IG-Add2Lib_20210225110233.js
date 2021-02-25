@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name               IG-Add2Lib
 // @namespace          IG-Add2Lib
-// @version            1.0.6
+// @version            1.0.5
 // @description        indiegala 快速领取免费游戏
 // @author             HCLonely
 // @license            MIT
