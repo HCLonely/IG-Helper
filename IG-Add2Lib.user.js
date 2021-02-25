@@ -21,7 +21,7 @@ function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len 
 // ==UserScript==
 // @name               IG-Add2Lib
 // @namespace          IG-Add2Lib
-// @version            1.0.4
+// @version            1.0.5
 // @description        indiegala 快速领取免费游戏
 // @author             HCLonely
 // @license            MIT
@@ -141,7 +141,7 @@ function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len 
                 timeout: 30000,
                 retry: 3
               }).then(function (response) {
-                var _response$response, _response$response2, _response$response3;
+                var _response$response, _response$response2, _response$response3, _response$response4;
 
                 if (((_response$response = response.response) === null || _response$response === void 0 ? void 0 : _response$response.status) === 'ok') {
                   Swal.update({
@@ -182,7 +182,7 @@ function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len 
                     icon: 'warning'
                   });
                   return true;
-                } else if (((_response$response3 = response.response) === null || _response$response3 === void 0 ? void 0 : _response$response3.status) === 'login') {
+                } else if (((_response$response3 = response.response) === null || _response$response3 === void 0 ? void 0 : _response$response3.status) === 'login' || ((_response$response4 = response.response) === null || _response$response4 === void 0 ? void 0 : _response$response4.status) === 'auth') {
                   Swal.fire({
                     title: '请先登录！',
                     icon: 'error',
