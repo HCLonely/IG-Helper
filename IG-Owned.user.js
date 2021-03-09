@@ -29,7 +29,7 @@ function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len 
 // ==UserScript==
 // @name               IG-Owned
 // @namespace          IG-Owned
-// @version            1.0.2
+// @version            1.0.3
 // @description        indiegala 检测游戏是否已拥有
 // @author             HCLonely
 // @license            MIT
@@ -106,54 +106,71 @@ function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len 
             case 0:
               notice = _args.length > 0 && _args[0] !== undefined ? _args[0] : false;
               update = _args.length > 1 && _args[1] !== undefined ? _args[1] : false;
-              allGames = ((_GM_getValue2 = GM_getValue('IG-Owned')) === null || _GM_getValue2 === void 0 ? void 0 : _GM_getValue2.games) || [];
-              _context.next = 5;
-              return getGames(1, notice);
+
+              if (!(GM_getValue('IG-Verified') === false)) {
+                _context.next = 5;
+                break;
+              }
+
+              if (notice) {
+                Swal.fire({
+                  title: '请先完成验证！',
+                  icon: 'error',
+                  html: '<a href="https://www.indiegala.com/library" target="_blank">前往验证</a>'
+                });
+              }
+
+              return _context.abrupt("return", []);
 
             case 5:
+              allGames = ((_GM_getValue2 = GM_getValue('IG-Owned')) === null || _GM_getValue2 === void 0 ? void 0 : _GM_getValue2.games) || [];
+              _context.next = 8;
+              return getGames(1, notice);
+
+            case 8:
               _yield$getGames = _context.sent;
               _yield$getGames2 = _slicedToArray(_yield$getGames, 2);
               pages = _yield$getGames2[0];
               games = _yield$getGames2[1];
 
               if (!(pages === 0)) {
-                _context.next = 11;
+                _context.next = 14;
                 break;
               }
 
               return _context.abrupt("return");
 
-            case 11:
+            case 14:
               allGames = [].concat(_toConsumableArray(allGames), _toConsumableArray(games));
 
               if (!(pages > 1 && update)) {
-                _context.next = 24;
+                _context.next = 27;
                 break;
               }
 
               i = 2;
 
-            case 14:
+            case 17:
               if (!(i <= pages)) {
-                _context.next = 24;
+                _context.next = 27;
                 break;
               }
 
-              _context.next = 17;
+              _context.next = 20;
               return getGames(i, notice);
 
-            case 17:
+            case 20:
               _yield$getGames3 = _context.sent;
               _yield$getGames4 = _slicedToArray(_yield$getGames3, 2);
               _games = _yield$getGames4[1];
               allGames = [].concat(_toConsumableArray(allGames), _toConsumableArray(_games));
 
-            case 21:
+            case 24:
               i++;
-              _context.next = 14;
+              _context.next = 17;
               break;
 
-            case 24:
+            case 27:
               allGames = _toConsumableArray(new Set(allGames));
               GM_setValue('IG-Owned', {
                 time: new Date().getTime(),
@@ -169,7 +186,7 @@ function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len 
 
               return _context.abrupt("return", allGames);
 
-            case 28:
+            case 31:
             case "end":
               return _context.stop();
           }
@@ -216,6 +233,18 @@ function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len 
       }
 
       if (response.status === 200) {
+        if (response.responseText.includes('Profile locked')) {
+          if (notice) {
+            Swal.fire({
+              title: '请先完成验证！',
+              icon: 'error',
+              html: '<a href="https://www.indiegala.com/library" target="_blank">前往验证</a>'
+            });
+          }
+
+          return [0, []];
+        }
+
         var html = $(response.responseText);
         var pages = 1;
 

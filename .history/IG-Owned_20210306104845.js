@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name               IG-Owned
 // @namespace          IG-Owned
-// @version            1.0.3
+// @version            1.0.2
 // @description        indiegala 检测游戏是否已拥有
 // @author             HCLonely
 // @license            MIT
@@ -44,16 +44,7 @@
     }
   }
   unsafeWindow.syncIgLib = async function syncIgLib (notice = false, update = false) {
-    if (GM_getValue('IG-Verified') === false){
-      if (notice){
-        Swal.fire({
-          title: '请先完成验证！',
-          icon: 'error',
-          html: '<a href="https://www.indiegala.com/library" target="_blank">前往验证</a>'
-        })
-      }
-      return []
-    }
+    
     let allGames = GM_getValue('IG-Owned')?.games || []
     const [pages, games] = await getGames(1, notice)
     if (pages === 0) return
@@ -103,16 +94,6 @@
           return [0, []]
         }
         if (response.status === 200) {
-          if (response.responseText.includes('Profile locked')) {
-            if (notice) {
-              Swal.fire({
-                title: '请先完成验证！',
-                icon: 'error',
-                html: '<a href="https://www.indiegala.com/library" target="_blank">前往验证</a>'
-              })
-            }
-            return [0, []]
-          }
           const html = $(response.responseText)
           let pages = 1
           if (page === 1) {
