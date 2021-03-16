@@ -29,7 +29,7 @@ function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len 
 // ==UserScript==
 // @name               IG-Owned
 // @namespace          IG-Owned
-// @version            1.0.3
+// @version            1.0.4
 // @description        indiegala 检测游戏是否已拥有
 // @author             HCLonely
 // @license            MIT
@@ -107,7 +107,7 @@ function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len 
               notice = _args.length > 0 && _args[0] !== undefined ? _args[0] : false;
               update = _args.length > 1 && _args[1] !== undefined ? _args[1] : false;
 
-              if (!(GM_getValue('IG-Verified') === false)) {
+              if (GM_getValue('IG-Verified')) {
                 _context.next = 5;
                 break;
               }
@@ -242,9 +242,11 @@ function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len 
             });
           }
 
+          GM_setValue('IG-Verified', false);
           return [0, []];
         }
 
+        GM_setValue('IG-Verified', true);
         var html = $(response.responseText);
         var pages = 1;
 
