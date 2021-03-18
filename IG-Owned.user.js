@@ -29,7 +29,7 @@ function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len 
 // ==UserScript==
 // @name               IG-Owned
 // @namespace          IG-Owned
-// @version            1.0.4
+// @version            1.0.5
 // @description        indiegala 检测游戏是否已拥有
 // @author             HCLonely
 // @license            MIT
@@ -116,7 +116,16 @@ function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len 
                 Swal.fire({
                   title: '请先完成验证！',
                   icon: 'error',
-                  html: '<a href="https://www.indiegala.com/library" target="_blank">前往验证</a>'
+                  html: '<a href="https://www.indiegala.com/library" target="_blank">前往验证</a>',
+                  showCancelButton: true,
+                  confirmButtonText: '老子完成验证了',
+                  cancelButtonText: '关闭'
+                }).then(function (_ref) {
+                  var value = _ref.value;
+
+                  if (value) {
+                    GM_setValue('IG-Verified', true);
+                  }
                 });
               }
 
@@ -222,8 +231,8 @@ function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len 
           showCancelButton: true,
           confirmButtonText: '登录',
           cancelButtonText: '关闭'
-        }).then(function (_ref) {
-          var value = _ref.value;
+        }).then(function (_ref2) {
+          var value = _ref2.value;
 
           if (value) {
             window.open('https://www.indiegala.com/login', '_blank');
@@ -238,7 +247,16 @@ function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len 
             Swal.fire({
               title: '请先完成验证！',
               icon: 'error',
-              html: '<a href="https://www.indiegala.com/library" target="_blank">前往验证</a>'
+              html: '<a href="https://www.indiegala.com/library" target="_blank">前往验证</a>',
+              showCancelButton: true,
+              confirmButtonText: '老子完成验证了',
+              cancelButtonText: '关闭'
+            }).then(function (_ref3) {
+              var value = _ref3.value;
+
+              if (value) {
+                GM_setValue('IG-Verified', true);
+              }
             });
           }
 
@@ -306,8 +324,8 @@ function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len 
       showCancelButton: true,
       confirmButtonText: '同步',
       cancelButtonText: '关闭'
-    }).then(function (_ref2) {
-      var value = _ref2.value;
+    }).then(function (_ref4) {
+      var value = _ref4.value;
 
       if (value) {
         syncIgLib(true, true);
