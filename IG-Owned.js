@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name               IG-Owned
 // @namespace          IG-Owned
-// @version            1.0.5
+// @version            1.0.6
 // @description        indiegala 检测游戏是否已拥有
 // @author             HCLonely
 // @license            MIT
@@ -17,6 +17,7 @@
 // @grant              GM_setValue
 // @grant              GM_getValue
 // @grant              GM_addStyle
+// @grant              GM_listValues
 // @grant              GM_xmlhttpRequest
 // @grant              GM_registerMenuCommand
 // @grant              unsafeWindow
@@ -27,23 +28,41 @@
 // @require            https://cdn.jsdelivr.net/npm/sweetalert2@9
 // @require            https://cdn.jsdelivr.net/npm/promise-polyfill@8.1.3/dist/polyfill.min.js
 // @require            https://greasyfork.org/scripts/418102-tm-request/code/TM_request.js?version=902218
+// @require            https://greasyfork.org/scripts/426803-gistsync/code/gistSync.js?version=933155
 // @connect            indiegala.com
+// @connect            api.github.com
 // @run-at             document-end
 // ==/UserScript==
 
 /* global syncIgLib */
 (function () {
-  function checkIgOwned() {
+  if (/^https?:\/\/www\.indiegala\.com\/library/.test(window.location.href)) {
+    const games = [...$.makeArray($('a.library-showcase-title')).map(e => $(e).attr('href')?.match(/https:\/\/.*?\.indiegala\.com\/(.*)/)?.[1]?.toLowerCase())].filter(e => e)
+    const allGames = GM_getValue('IG-Owned')?.games || []
+    GM_setValue('IG-Owned', { time: new Date().getTime(), games: [...new Set([...allGames, ...games])] })
+  }
+  if (window.location.hostname.includes('.indiegala.com')) {
+    if ($('.developer-product-download-button-login').length > 0 && $('.fa-download').length > 0) {
+      const allGames = GM_getValue('IG-Owned')?.games || []
+      GM_setValue('IG-Owned', { time: new Date().getTime(), games: [...new Set([...allGames, window.location.pathname.replace('/', '')])] })
+    }
+  }
+  function checkIgOwned () {
     const allGames = GM_getValue('IG-Owned')?.games || []
     for (const el of $('a[href*=".indiegala.com/"]:not(".ig-checked")')) {
       const $this = $(el).addClass('ig-checked')
       const href = $this.attr('href')
       if (/^https?:\/\/.+?\.indiegala\.com\/.+$/.test(href) && allGames.includes(new URL(href).pathname.replace(/\//g, '').toLowerCase())) {
-        $this.addClass('ig-owned')
+        const itemContDiv = $this.parents('.item-cont')
+        if (window.location.hostname === 'www.indiegala.com' && itemContDiv.length > 0) {
+          itemContDiv.addClass('ig-owned')
+        } else {
+          $this.addClass('ig-owned')
+        }
       }
     }
   }
-  unsafeWindow.syncIgLib = async function syncIgLib(notice = false, update = false) {
+  unsafeWindow.syncIgLib = async function syncIgLib (notice = false, update = false) {
     if (!GM_getValue('IG-Verified')) {
       if (notice) {
         Swal.fire({
@@ -81,7 +100,7 @@
     }
     return allGames
   }
-  function getGames(page, notice) {
+  function getGames (page, notice) {
     if (notice) {
       Swal.fire({
         title: '正在同步第' + page + '页...',

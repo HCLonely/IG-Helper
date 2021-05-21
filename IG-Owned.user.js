@@ -1,13 +1,5 @@
 "use strict";
 
-function _toConsumableArray(arr) { return _arrayWithoutHoles(arr) || _iterableToArray(arr) || _unsupportedIterableToArray(arr) || _nonIterableSpread(); }
-
-function _nonIterableSpread() { throw new TypeError("Invalid attempt to spread non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); }
-
-function _iterableToArray(iter) { if (typeof Symbol !== "undefined" && Symbol.iterator in Object(iter)) return Array.from(iter); }
-
-function _arrayWithoutHoles(arr) { if (Array.isArray(arr)) return _arrayLikeToArray(arr); }
-
 function _slicedToArray(arr, i) { return _arrayWithHoles(arr) || _iterableToArrayLimit(arr, i) || _unsupportedIterableToArray(arr, i) || _nonIterableRest(); }
 
 function _nonIterableRest() { throw new TypeError("Invalid attempt to destructure non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); }
@@ -22,14 +14,22 @@ function _asyncToGenerator(fn) { return function () { var self = this, args = ar
 
 function _createForOfIteratorHelper(o, allowArrayLike) { var it; if (typeof Symbol === "undefined" || o[Symbol.iterator] == null) { if (Array.isArray(o) || (it = _unsupportedIterableToArray(o)) || allowArrayLike && o && typeof o.length === "number") { if (it) o = it; var i = 0; var F = function F() {}; return { s: F, n: function n() { if (i >= o.length) return { done: true }; return { done: false, value: o[i++] }; }, e: function e(_e2) { throw _e2; }, f: F }; } throw new TypeError("Invalid attempt to iterate non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); } var normalCompletion = true, didErr = false, err; return { s: function s() { it = o[Symbol.iterator](); }, n: function n() { var step = it.next(); normalCompletion = step.done; return step; }, e: function e(_e3) { didErr = true; err = _e3; }, f: function f() { try { if (!normalCompletion && it["return"] != null) it["return"](); } finally { if (didErr) throw err; } } }; }
 
+function _toConsumableArray(arr) { return _arrayWithoutHoles(arr) || _iterableToArray(arr) || _unsupportedIterableToArray(arr) || _nonIterableSpread(); }
+
+function _nonIterableSpread() { throw new TypeError("Invalid attempt to spread non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); }
+
 function _unsupportedIterableToArray(o, minLen) { if (!o) return; if (typeof o === "string") return _arrayLikeToArray(o, minLen); var n = Object.prototype.toString.call(o).slice(8, -1); if (n === "Object" && o.constructor) n = o.constructor.name; if (n === "Map" || n === "Set") return Array.from(o); if (n === "Arguments" || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(n)) return _arrayLikeToArray(o, minLen); }
+
+function _iterableToArray(iter) { if (typeof Symbol !== "undefined" && Symbol.iterator in Object(iter)) return Array.from(iter); }
+
+function _arrayWithoutHoles(arr) { if (Array.isArray(arr)) return _arrayLikeToArray(arr); }
 
 function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len = arr.length; for (var i = 0, arr2 = new Array(len); i < len; i++) { arr2[i] = arr[i]; } return arr2; }
 
 // ==UserScript==
 // @name               IG-Owned
 // @namespace          IG-Owned
-// @version            1.0.5
+// @version            1.0.6
 // @description        indiegala 检测游戏是否已拥有
 // @author             HCLonely
 // @license            MIT
@@ -43,6 +43,7 @@ function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len 
 // @grant              GM_setValue
 // @grant              GM_getValue
 // @grant              GM_addStyle
+// @grant              GM_listValues
 // @grant              GM_xmlhttpRequest
 // @grant              GM_registerMenuCommand
 // @grant              unsafeWindow
@@ -52,16 +53,49 @@ function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len 
 // @require            https://cdn.jsdelivr.net/npm/sweetalert2@9
 // @require            https://cdn.jsdelivr.net/npm/promise-polyfill@8.1.3/dist/polyfill.min.js
 // @require            https://greasyfork.org/scripts/418102-tm-request/code/TM_request.js?version=902218
+// @require            https://greasyfork.org/scripts/426803-gistsync/code/gistSync.js?version=933155
 // @connect            indiegala.com
+// @connect            api.github.com
 // @run-at             document-end
 // ==/UserScript==
 
 /* global syncIgLib */
 (function () {
-  function checkIgOwned() {
+  if (/^https?:\/\/www\.indiegala\.com\/library/.test(window.location.href)) {
     var _GM_getValue;
 
+    var games = _toConsumableArray($.makeArray($('a.library-showcase-title')).map(function (e) {
+      var _$$attr, _$$attr$match, _$$attr$match$;
+
+      return (_$$attr = $(e).attr('href')) === null || _$$attr === void 0 ? void 0 : (_$$attr$match = _$$attr.match(/https:\/\/.*?\.indiegala\.com\/(.*)/)) === null || _$$attr$match === void 0 ? void 0 : (_$$attr$match$ = _$$attr$match[1]) === null || _$$attr$match$ === void 0 ? void 0 : _$$attr$match$.toLowerCase();
+    })).filter(function (e) {
+      return e;
+    });
+
     var allGames = ((_GM_getValue = GM_getValue('IG-Owned')) === null || _GM_getValue === void 0 ? void 0 : _GM_getValue.games) || [];
+    GM_setValue('IG-Owned', {
+      time: new Date().getTime(),
+      games: _toConsumableArray(new Set([].concat(_toConsumableArray(allGames), _toConsumableArray(games))))
+    });
+  }
+
+  if (window.location.hostname.includes('.indiegala.com')) {
+    if ($('.developer-product-download-button-login').length > 0 && $('.fa-download').length > 0) {
+      var _GM_getValue2;
+
+      var _allGames = ((_GM_getValue2 = GM_getValue('IG-Owned')) === null || _GM_getValue2 === void 0 ? void 0 : _GM_getValue2.games) || [];
+
+      GM_setValue('IG-Owned', {
+        time: new Date().getTime(),
+        games: _toConsumableArray(new Set([].concat(_toConsumableArray(_allGames), [window.location.pathname.replace('/', '')])))
+      });
+    }
+  }
+
+  function checkIgOwned() {
+    var _GM_getValue3;
+
+    var allGames = ((_GM_getValue3 = GM_getValue('IG-Owned')) === null || _GM_getValue3 === void 0 ? void 0 : _GM_getValue3.games) || [];
 
     var _iterator = _createForOfIteratorHelper($('a[href*=".indiegala.com/"]:not(".ig-checked")')),
         _step;
@@ -73,7 +107,13 @@ function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len 
         var href = $this.attr('href');
 
         if (/^https?:\/\/.+?\.indiegala\.com\/.+$/.test(href) && allGames.includes(new URL(href).pathname.replace(/\//g, '').toLowerCase())) {
-          $this.addClass('ig-owned');
+          var itemContDiv = $this.parents('.item-cont');
+
+          if (window.location.hostname === 'www.indiegala.com' && itemContDiv.length > 0) {
+            itemContDiv.addClass('ig-owned');
+          } else {
+            $this.addClass('ig-owned');
+          }
         }
       }
     } catch (err) {
@@ -85,7 +125,7 @@ function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len 
 
   unsafeWindow.syncIgLib = /*#__PURE__*/function () {
     var _syncIgLib = _asyncToGenerator( /*#__PURE__*/regeneratorRuntime.mark(function _callee() {
-      var _GM_getValue2;
+      var _GM_getValue4;
 
       var notice,
           update,
@@ -132,7 +172,7 @@ function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len 
               return _context.abrupt("return", []);
 
             case 5:
-              allGames = ((_GM_getValue2 = GM_getValue('IG-Owned')) === null || _GM_getValue2 === void 0 ? void 0 : _GM_getValue2.games) || [];
+              allGames = ((_GM_getValue4 = GM_getValue('IG-Owned')) === null || _GM_getValue4 === void 0 ? void 0 : _GM_getValue4.games) || [];
               _context.next = 8;
               return getGames(1, notice);
 
@@ -278,15 +318,15 @@ function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len 
           }
         }
 
-        var games = _toConsumableArray($.makeArray(html.find('a.library-showcase-title')).map(function (e) {
-          var _$$attr, _$$attr$match, _$$attr$match$;
+        var _games2 = _toConsumableArray($.makeArray(html.find('a.library-showcase-title')).map(function (e) {
+          var _$$attr2, _$$attr2$match, _$$attr2$match$;
 
-          return (_$$attr = $(e).attr('href')) === null || _$$attr === void 0 ? void 0 : (_$$attr$match = _$$attr.match(/https:\/\/.*?\.indiegala\.com\/(.*)/)) === null || _$$attr$match === void 0 ? void 0 : (_$$attr$match$ = _$$attr$match[1]) === null || _$$attr$match$ === void 0 ? void 0 : _$$attr$match$.toLowerCase();
+          return (_$$attr2 = $(e).attr('href')) === null || _$$attr2 === void 0 ? void 0 : (_$$attr2$match = _$$attr2.match(/https:\/\/.*?\.indiegala\.com\/(.*)/)) === null || _$$attr2$match === void 0 ? void 0 : (_$$attr2$match$ = _$$attr2$match[1]) === null || _$$attr2$match$ === void 0 ? void 0 : _$$attr2$match$.toLowerCase();
         })).filter(function (e) {
           return e;
         });
 
-        return [pages, games];
+        return [pages, _games2];
       } else {
         console.error(response);
 
