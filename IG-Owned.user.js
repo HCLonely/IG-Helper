@@ -29,7 +29,7 @@ function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len 
 // ==UserScript==
 // @name               IG-Owned
 // @namespace          IG-Owned
-// @version            1.0.6
+// @version            1.0.7
 // @description        indiegala 检测游戏是否已拥有
 // @author             HCLonely
 // @license            MIT
@@ -53,7 +53,7 @@ function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len 
 // @require            https://cdn.jsdelivr.net/npm/sweetalert2@9
 // @require            https://cdn.jsdelivr.net/npm/promise-polyfill@8.1.3/dist/polyfill.min.js
 // @require            https://greasyfork.org/scripts/418102-tm-request/code/TM_request.js?version=902218
-// @require            https://greasyfork.org/scripts/426803-gistsync/code/gistSync.js?version=933155
+// @require            https://greasyfork.org/scripts/426803-gistsync/code/gistSync.js?version=933451
 // @connect            indiegala.com
 // @connect            api.github.com
 // @run-at             document-end
