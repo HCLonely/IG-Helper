@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name               IG-Owned
 // @namespace          IG-Owned
-// @version            1.0.8
+// @version            1.0.9
 // @description        indiegala 检测游戏是否已拥有
 // @author             HCLonely
 // @license            MIT
@@ -36,13 +36,13 @@
 
 /* global syncIgLib */
 (function () {
-  if (/^https?:\/\/www\.indiegala\.com\/library/.test(window.location.href)) {
-    const games = [...$.makeArray($('a.library-showcase-title')).map(e => $(e).attr('href')?.match(/https:\/\/.*?\.indiegala\.com\/(.*)/)?.[1]?.toLowerCase())].filter(e => e)
+  if (/^https?:\/\/www\.indiegala\.com\/(library|showcase)/.test(window.location.href)) {
+    const games = [...$.makeArray($('a.library-showcase-title,a.main-list-item-clicker')).map(e => $(e).attr('href')?.match(/https:\/\/.*?\.indiegala\.com\/(.*)/)?.[1]?.toLowerCase())].filter(e => e)
     const allGames = GM_getValue('IG-Owned')?.games || []
     GM_setValue('IG-Owned', { time: new Date().getTime(), games: [...new Set([...allGames, ...games])] })
   }
   if (window.location.hostname.includes('.indiegala.com')) {
-    if ($('.developer-product-download-button-login').length > 0 && $('.fa-download').length > 0) {
+    if ($('i.fa-download:visible').length > 0) {
       const allGames = GM_getValue('IG-Owned')?.games || []
       GM_setValue('IG-Owned', { time: new Date().getTime(), games: [...new Set([...allGames, window.location.pathname.replace('/', '')])] })
     }

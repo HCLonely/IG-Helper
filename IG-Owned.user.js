@@ -29,7 +29,7 @@ function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len 
 // ==UserScript==
 // @name               IG-Owned
 // @namespace          IG-Owned
-// @version            1.0.8
+// @version            1.0.9
 // @description        indiegala 检测游戏是否已拥有
 // @author             HCLonely
 // @license            MIT
@@ -61,10 +61,10 @@ function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len 
 
 /* global syncIgLib */
 (function () {
-  if (/^https?:\/\/www\.indiegala\.com\/library/.test(window.location.href)) {
+  if (/^https?:\/\/www\.indiegala\.com\/(library|showcase)/.test(window.location.href)) {
     var _GM_getValue;
 
-    var games = _toConsumableArray($.makeArray($('a.library-showcase-title')).map(function (e) {
+    var games = _toConsumableArray($.makeArray($('a.library-showcase-title,a.main-list-item-clicker')).map(function (e) {
       var _$$attr, _$$attr$match, _$$attr$match$;
 
       return (_$$attr = $(e).attr('href')) === null || _$$attr === void 0 ? void 0 : (_$$attr$match = _$$attr.match(/https:\/\/.*?\.indiegala\.com\/(.*)/)) === null || _$$attr$match === void 0 ? void 0 : (_$$attr$match$ = _$$attr$match[1]) === null || _$$attr$match$ === void 0 ? void 0 : _$$attr$match$.toLowerCase();
@@ -80,7 +80,7 @@ function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len 
   }
 
   if (window.location.hostname.includes('.indiegala.com')) {
-    if ($('.developer-product-download-button-login').length > 0 && $('.fa-download').length > 0) {
+    if ($('i.fa-download:visible').length > 0) {
       var _GM_getValue2;
 
       var _allGames = ((_GM_getValue2 = GM_getValue('IG-Owned')) === null || _GM_getValue2 === void 0 ? void 0 : _GM_getValue2.games) || [];
