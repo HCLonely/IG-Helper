@@ -29,7 +29,7 @@ function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len 
 // ==UserScript==
 // @name               IG-Owned
 // @namespace          IG-Owned
-// @version            1.0.9
+// @version            1.1.0
 // @description        indiegala 检测游戏是否已拥有
 // @author             HCLonely
 // @license            MIT
@@ -43,6 +43,7 @@ function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len 
 // @grant              GM_setValue
 // @grant              GM_getValue
 // @grant              GM_addStyle
+// @grant              GM_getResourceText
 // @grant              GM_listValues
 // @grant              GM_xmlhttpRequest
 // @grant              GM_registerMenuCommand
@@ -54,6 +55,8 @@ function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len 
 // @require            https://cdn.jsdelivr.net/npm/promise-polyfill@8.1.3/dist/polyfill.min.js
 // @require            https://greasyfork.org/scripts/418102-tm-request/code/TM_request.js?version=902218
 // @require            https://greasyfork.org/scripts/426803-gistsync/code/gistSync.js?version=957824
+// @require            https://cdn.jsdelivr.net/npm/overhang@1.0.8/dist/overhang.min.js
+// @resource           overhang https://cdn.jsdelivr.net/npm/overhang@1.0.8/dist/overhang.min.css
 // @connect            indiegala.com
 // @connect            api.github.com
 // @run-at             document-end
@@ -92,8 +95,24 @@ function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len 
     }
   }
 
+  var loadTimes = 0;
+  var observer = new MutationObserver(checkIgOwned);
+  observer.observe(document.documentElement, {
+    attributes: false,
+    characterData: false,
+    childList: true,
+    subtree: true
+  });
+
   function checkIgOwned() {
     var _GM_getValue3;
+
+    loadTimes++;
+
+    if (loadTimes > 1000) {
+      observer.disconnect();
+      return;
+    }
 
     var allGames = ((_GM_getValue3 = GM_getValue('IG-Owned')) === null || _GM_getValue3 === void 0 ? void 0 : _GM_getValue3.games) || [];
 
@@ -162,6 +181,29 @@ function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len 
                   cancelButtonText: '关闭'
                 }).then(function (_ref) {
                   var value = _ref.value;
+
+                  if (value) {
+                    GM_setValue('IG-Verified', true);
+                  }
+                });
+              } else if (!GM_getValue('IG-Ignore')) {
+                Swal.fire({
+                  title: '[IG-Owned]提醒',
+                  icon: 'error',
+                  html: '获取IG游戏库失败，请<a href="https://www.indiegala.com/library" target="_blank">前往验证</a>',
+                  showCancelButton: true,
+                  showDenyButton: true,
+                  confirmButtonText: '老子完成验证了',
+                  cancelButtonText: '关闭',
+                  denyButtonText: '不再提醒'
+                }).then(function (_ref2) {
+                  var value = _ref2.value,
+                      isDenied = _ref2.isDenied;
+
+                  if (isDenied) {
+                    GM_setValue('IG-Ignore', true);
+                    return;
+                  }
 
                   if (value) {
                     GM_setValue('IG-Verified', true);
@@ -271,8 +313,8 @@ function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len 
           showCancelButton: true,
           confirmButtonText: '登录',
           cancelButtonText: '关闭'
-        }).then(function (_ref2) {
-          var value = _ref2.value;
+        }).then(function (_ref3) {
+          var value = _ref3.value;
 
           if (value) {
             window.open('https://www.indiegala.com/login', '_blank');
@@ -291,8 +333,8 @@ function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len 
               showCancelButton: true,
               confirmButtonText: '老子完成验证了',
               cancelButtonText: '关闭'
-            }).then(function (_ref3) {
-              var value = _ref3.value;
+            }).then(function (_ref4) {
+              var value = _ref4.value;
 
               if (value) {
                 GM_setValue('IG-Verified', true);
@@ -356,6 +398,7 @@ function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len 
     syncIgLib(true, true);
   });
   GM_addStyle('.ig-owned{color:#ffffff !important;background:#5c8a00 !important;}');
+  GM_addStyle(GM_getResourceText('overhang'));
 
   if (!GM_getValue('IG-Owned')) {
     Swal.fire({
@@ -364,8 +407,8 @@ function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len 
       showCancelButton: true,
       confirmButtonText: '同步',
       cancelButtonText: '关闭'
-    }).then(function (_ref4) {
-      var value = _ref4.value;
+    }).then(function (_ref5) {
+      var value = _ref5.value;
 
       if (value) {
         syncIgLib(true, true);
@@ -375,12 +418,5 @@ function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len 
   }
 
   checkIgOwned();
-  var observer = new MutationObserver(checkIgOwned);
-  observer.observe(document.documentElement, {
-    attributes: true,
-    characterData: true,
-    childList: true,
-    subtree: true
-  });
   syncIgLib(false, false);
 })();

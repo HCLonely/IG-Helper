@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name               IG-Owned
 // @namespace          IG-Owned
-// @version            1.0.9
+// @version            1.1.0
 // @description        indiegala 检测游戏是否已拥有
 // @author             HCLonely
 // @license            MIT
@@ -17,6 +17,7 @@
 // @grant              GM_setValue
 // @grant              GM_getValue
 // @grant              GM_addStyle
+// @grant              GM_getResourceText
 // @grant              GM_listValues
 // @grant              GM_xmlhttpRequest
 // @grant              GM_registerMenuCommand
@@ -29,6 +30,8 @@
 // @require            https://cdn.jsdelivr.net/npm/promise-polyfill@8.1.3/dist/polyfill.min.js
 // @require            https://greasyfork.org/scripts/418102-tm-request/code/TM_request.js?version=902218
 // @require            https://greasyfork.org/scripts/426803-gistsync/code/gistSync.js?version=957824
+// @require            https://cdn.jsdelivr.net/npm/overhang@1.0.8/dist/overhang.min.js
+// @resource           overhang https://cdn.jsdelivr.net/npm/overhang@1.0.8/dist/overhang.min.css
 // @connect            indiegala.com
 // @connect            api.github.com
 // @run-at             document-end
@@ -47,7 +50,23 @@
       GM_setValue('IG-Owned', { time: new Date().getTime(), games: [...new Set([...allGames, window.location.pathname.replace('/', '')])] })
     }
   }
-  function checkIgOwned () {
+
+  let loadTimes = 0;
+  const observer = new MutationObserver(checkIgOwned)
+  observer.observe(document.documentElement, {
+    attributes: false,
+    characterData: false,
+    childList: true,
+    subtree: true
+  })
+
+  function checkIgOwned() {
+    loadTimes++;
+    if (loadTimes > 1000) {
+      observer.disconnect();
+      return;
+    }
+
     const allGames = GM_getValue('IG-Owned')?.games || []
     for (const el of $('a[href*=".indiegala.com/"]:not(".ig-checked")')) {
       const $this = $(el).addClass('ig-checked')
@@ -73,6 +92,25 @@
           confirmButtonText: '老子完成验证了',
           cancelButtonText: '关闭'
         }).then(({ value }) => {
+          if (value) {
+            GM_setValue('IG-Verified', true)
+          }
+        })
+      } else if (!GM_getValue('IG-Ignore')) {
+        Swal.fire({
+          title: '[IG-Owned]提醒',
+          icon: 'error',
+          html: '获取IG游戏库失败，请<a href="https://www.indiegala.com/library" target="_blank">前往验证</a>',
+          showCancelButton: true,
+          showDenyButton: true,
+          confirmButtonText: '老子完成验证了',
+          cancelButtonText: '关闭',
+          denyButtonText: '不再提醒'
+        }).then(({ value, isDenied }) => {
+          if (isDenied) {
+            GM_setValue('IG-Ignore', true)
+            return
+          }
           if (value) {
             GM_setValue('IG-Verified', true)
           }
@@ -182,6 +220,7 @@
   }
   GM_registerMenuCommand('同步游戏库', () => { syncIgLib(true, true) })
   GM_addStyle('.ig-owned{color:#ffffff !important;background:#5c8a00 !important;}')
+  GM_addStyle(GM_getResourceText('overhang'))
   if (!GM_getValue('IG-Owned')) {
     Swal.fire({
       title: '首次使用IG游戏库检测请先同步！',
@@ -197,12 +236,5 @@
     return
   }
   checkIgOwned()
-  const observer = new MutationObserver(checkIgOwned)
-  observer.observe(document.documentElement, {
-    attributes: true,
-    characterData: true,
-    childList: true,
-    subtree: true
-  })
   syncIgLib(false, false)
 })()
