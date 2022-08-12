@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name               IG-Add2Lib
 // @namespace          IG-Add2Lib
-// @version            1.0.6
+// @version            1.0.7
 // @description        indiegala 快速领取免费游戏
 // @author             HCLonely
 // @license            MIT
@@ -34,7 +34,7 @@
     for (const el of $('a[href*=".indiegala.com/"]:not(".ig-add2lib")')) {
       const $this = $(el).addClass('ig-add2lib')
       const href = $this.attr('href')
-      if (/^https?:\/\/.+?\.indiegala\.com\/.+$/.test(href)) {
+      if (/^https?:\/\/.+?\.indiegala\.com\/.+$/.test(href) && !(new URL(href).pathname.includes('login'))) {
         $this.after(`<a class="add-to-library" href="javascript:void(0)" onclick="addToIndiegalaLibrary(this)" data-href="${href}" target="_self">入库</a>`)
       }
     }

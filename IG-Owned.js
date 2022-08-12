@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name               IG-Owned
 // @namespace          IG-Owned
-// @version            1.1.0
+// @version            1.1.2
 // @description        indiegala 检测游戏是否已拥有
 // @author             HCLonely
 // @license            MIT
@@ -24,7 +24,8 @@
 // @grant              unsafeWindow
 // @grant              window.open
 
-// @require            https://cdn.jsdelivr.net/npm/jquery@3.4.1/dist/jquery.slim.min.js
+// @require            https://cdn.jsdelivr.net/npm/jquery@3.4.1/dist/jquery.min.js
+// @require            https://cdn.jsdelivr.net/npm/jquery.easing@1.4.1/jquery.easing.min.js
 // @require            https://cdn.jsdelivr.net/npm/regenerator-runtime@0.13.7/runtime.min.js
 // @require            https://cdn.jsdelivr.net/npm/sweetalert2@9
 // @require            https://cdn.jsdelivr.net/npm/promise-polyfill@8.1.3/dist/polyfill.min.js
@@ -60,7 +61,7 @@
     subtree: true
   })
 
-  function checkIgOwned() {
+  function checkIgOwned(first = false) {
     loadTimes++;
     if (loadTimes > 1000) {
       observer.disconnect();
@@ -68,7 +69,10 @@
     }
 
     const allGames = GM_getValue('IG-Owned')?.games || []
-    for (const el of $('a[href*=".indiegala.com/"]:not(".ig-checked")')) {
+    const igLink = $('a[href*=".indiegala.com/"]:not(".ig-checked")')
+    if (igLink.length === 0) return
+    if (first === true) syncIgLib(false, false)
+    for (const el of $.makeArray(igLink)) {
       const $this = $(el).addClass('ig-checked')
       const href = $this.attr('href')
       if (/^https?:\/\/.+?\.indiegala\.com\/.+$/.test(href) && allGames.includes(new URL(href).pathname.replace(/\//g, '').toLowerCase())) {
@@ -81,7 +85,7 @@
       }
     }
   }
-  unsafeWindow.syncIgLib = async function syncIgLib (notice = false, update = false) {
+  unsafeWindow.syncIgLib = async function syncIgLib(notice = false, update = false) {
     if (!GM_getValue('IG-Verified')) {
       if (notice) {
         Swal.fire({
@@ -138,7 +142,7 @@
     }
     return allGames
   }
-  function getGames (page, notice) {
+  function getGames(page, notice) {
     if (notice) {
       Swal.fire({
         title: '正在同步第' + page + '页...',
@@ -152,18 +156,27 @@
       retry: 3
     })
       .then(response => {
-        if (notice && new URL(response.finalUrl).pathname === '/login') {
-          Swal.fire({
-            title: '请先登录！',
-            icon: 'error',
-            showCancelButton: true,
-            confirmButtonText: '登录',
-            cancelButtonText: '关闭'
-          }).then(({ value }) => {
-            if (value) {
-              window.open('https://www.indiegala.com/login', '_blank')
-            }
-          })
+        if (new URL(response.finalUrl).pathname === '/login') {
+          if (notice) {
+            Swal.fire({
+              title: '请先登录！',
+              icon: 'error',
+              showCancelButton: true,
+              confirmButtonText: '登录',
+              cancelButtonText: '关闭'
+            }).then(({ value }) => {
+              if (value) {
+                window.open('https://www.indiegala.com/login', '_blank')
+              }
+            })
+          } else {
+            $('body').overhang({
+              type: 'error',
+              message: 'IG登录凭证已过期，请重新登录<a href="https://www.indiegala.com/login" target="_blank">https://www.indiegala.com/login</a>',
+              html: true,
+              closeConfirm: true
+            });
+          }
           return [0, []]
         }
         if (response.status === 200) {
@@ -235,6 +248,6 @@
     })
     return
   }
-  checkIgOwned()
-  syncIgLib(false, false)
+  checkIgOwned(true)
+  // syncIgLib(false, false)
 })()

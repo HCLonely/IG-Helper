@@ -29,7 +29,7 @@ function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len 
 // ==UserScript==
 // @name               IG-Owned
 // @namespace          IG-Owned
-// @version            1.1.0
+// @version            1.1.2
 // @description        indiegala 检测游戏是否已拥有
 // @author             HCLonely
 // @license            MIT
@@ -49,7 +49,8 @@ function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len 
 // @grant              GM_registerMenuCommand
 // @grant              unsafeWindow
 // @grant              window.open
-// @require            https://cdn.jsdelivr.net/npm/jquery@3.4.1/dist/jquery.slim.min.js
+// @require            https://cdn.jsdelivr.net/npm/jquery@3.4.1/dist/jquery.min.js
+// @require            https://cdn.jsdelivr.net/npm/jquery.easing@1.4.1/jquery.easing.min.js
 // @require            https://cdn.jsdelivr.net/npm/regenerator-runtime@0.13.7/runtime.min.js
 // @require            https://cdn.jsdelivr.net/npm/sweetalert2@9
 // @require            https://cdn.jsdelivr.net/npm/promise-polyfill@8.1.3/dist/polyfill.min.js
@@ -107,6 +108,7 @@ function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len 
   function checkIgOwned() {
     var _GM_getValue3;
 
+    var first = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : false;
     loadTimes++;
 
     if (loadTimes > 1000) {
@@ -115,8 +117,11 @@ function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len 
     }
 
     var allGames = ((_GM_getValue3 = GM_getValue('IG-Owned')) === null || _GM_getValue3 === void 0 ? void 0 : _GM_getValue3.games) || [];
+    var igLink = $('a[href*=".indiegala.com/"]:not(".ig-checked")');
+    if (igLink.length === 0) return;
+    if (first === true) syncIgLib(false, false);
 
-    var _iterator = _createForOfIteratorHelper($('a[href*=".indiegala.com/"]:not(".ig-checked")')),
+    var _iterator = _createForOfIteratorHelper($.makeArray(igLink)),
         _step;
 
     try {
@@ -306,20 +311,30 @@ function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len 
       timeout: 30000,
       retry: 3
     }).then(function (response) {
-      if (notice && new URL(response.finalUrl).pathname === '/login') {
-        Swal.fire({
-          title: '请先登录！',
-          icon: 'error',
-          showCancelButton: true,
-          confirmButtonText: '登录',
-          cancelButtonText: '关闭'
-        }).then(function (_ref3) {
-          var value = _ref3.value;
+      if (new URL(response.finalUrl).pathname === '/login') {
+        if (notice) {
+          Swal.fire({
+            title: '请先登录！',
+            icon: 'error',
+            showCancelButton: true,
+            confirmButtonText: '登录',
+            cancelButtonText: '关闭'
+          }).then(function (_ref3) {
+            var value = _ref3.value;
 
-          if (value) {
-            window.open('https://www.indiegala.com/login', '_blank');
-          }
-        });
+            if (value) {
+              window.open('https://www.indiegala.com/login', '_blank');
+            }
+          });
+        } else {
+          $('body').overhang({
+            type: 'error',
+            message: 'IG登录凭证已过期，请重新登录<a href="https://www.indiegala.com/login" target="_blank">https://www.indiegala.com/login</a>',
+            html: true,
+            closeConfirm: true
+          });
+        }
+
         return [0, []];
       }
 
@@ -417,6 +432,5 @@ function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len 
     return;
   }
 
-  checkIgOwned();
-  syncIgLib(false, false);
+  checkIgOwned(true); // syncIgLib(false, false)
 })();
