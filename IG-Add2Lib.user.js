@@ -21,7 +21,7 @@ function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len 
 // ==UserScript==
 // @name               IG-Add2Lib
 // @namespace          IG-Add2Lib
-// @version            1.0.7
+// @version            1.0.8
 // @description        indiegala 快速领取免费游戏
 // @author             HCLonely
 // @license            MIT
@@ -57,7 +57,7 @@ function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len 
         var $this = $(el).addClass('ig-add2lib');
         var href = $this.attr('href');
 
-        if (/^https?:\/\/.+?\.indiegala\.com\/.+$/.test(href) && !new URL(href).pathname.includes('login')) {
+        if (/^https?:\/\/.+?\.indiegala\.com\/.+$/.test(href) && !['/login', '/library'].includes(new URL(href).pathname)) {
           $this.after("<a class=\"add-to-library\" href=\"javascript:void(0)\" onclick=\"addToIndiegalaLibrary(this)\" data-href=\"".concat(href, "\" target=\"_self\">\u5165\u5E93</a>"));
         }
       }
