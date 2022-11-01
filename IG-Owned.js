@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name               IG-Owned
 // @namespace          IG-Owned
-// @version            1.1.2
+// @version            1.1.3
 // @description        indiegala 检测游戏是否已拥有
 // @author             HCLonely
 // @license            MIT
@@ -43,12 +43,12 @@
   if (/^https?:\/\/www\.indiegala\.com\/(library|showcase)/.test(window.location.href)) {
     const games = [...$.makeArray($('a.library-showcase-title,a.main-list-item-clicker')).map(e => $(e).attr('href')?.match(/https:\/\/.*?\.indiegala\.com\/(.*)/)?.[1]?.toLowerCase())].filter(e => e)
     const allGames = GM_getValue('IG-Owned')?.games || []
-    GM_setValue('IG-Owned', { time: new Date().getTime(), games: [...new Set([...allGames, ...games])] })
+    GM_setValue('IG-Owned', { time: new Date().getTime(), games: [...new Set([...allGames, ...games])].filter((e) => e) })
   }
   if (window.location.hostname.includes('.indiegala.com')) {
     if ($('i.fa-download:visible').length > 0) {
       const allGames = GM_getValue('IG-Owned')?.games || []
-      GM_setValue('IG-Owned', { time: new Date().getTime(), games: [...new Set([...allGames, window.location.pathname.replace('/', '')])] })
+      GM_setValue('IG-Owned', { time: new Date().getTime(), games: [...new Set([...allGames, window.location.pathname.replace('/', '')])].filter((e) => e) })
     }
   }
 
@@ -68,14 +68,19 @@
       return;
     }
 
-    const allGames = GM_getValue('IG-Owned')?.games || []
-    const igLink = $('a[href*=".indiegala.com/"]:not(".ig-checked")')
+    const allGames = (GM_getValue('IG-Owned')?.games || []).filter((e) => e)
+    const igLink = $('a[href*=".indiegala.com"]:not(".ig-checked")')
     if (igLink.length === 0) return
     if (first === true) syncIgLib(false, false)
     for (const el of $.makeArray(igLink)) {
       const $this = $(el).addClass('ig-checked')
       const href = $this.attr('href')
-      if (/^https?:\/\/.+?\.indiegala\.com\/.+$/.test(href) && allGames.includes(new URL(href).pathname.replace(/\//g, '').toLowerCase())) {
+      console.log(new URL(href).hostname.split('.')[0].toLowerCase());
+      if (/^https?:\/\/.+?\.indiegala\.com/.test(href) &&
+        (allGames.includes(new URL(href).pathname.replace(/\//g, '').toLowerCase()) ||
+        allGames.includes(new URL(href).hostname.split('.')[0].toLowerCase())
+        )
+      ) {
         const itemContDiv = $this.parents('.item-cont')
         if (window.location.hostname === 'www.indiegala.com' && itemContDiv.length > 0) {
           itemContDiv.addClass('ig-owned')
@@ -133,7 +138,7 @@
       }
     }
     allGames = [...new Set(allGames)]
-    GM_setValue('IG-Owned', { time: new Date().getTime(), games: allGames })
+    GM_setValue('IG-Owned', { time: new Date().getTime(), games: allGames.filter((e) => e) })
     if (notice) {
       Swal.fire({
         title: '同步完成！',

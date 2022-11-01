@@ -29,7 +29,7 @@ function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len 
 // ==UserScript==
 // @name               IG-Owned
 // @namespace          IG-Owned
-// @version            1.1.2
+// @version            1.1.3
 // @description        indiegala 检测游戏是否已拥有
 // @author             HCLonely
 // @license            MIT
@@ -79,7 +79,9 @@ function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len 
     var allGames = ((_GM_getValue = GM_getValue('IG-Owned')) === null || _GM_getValue === void 0 ? void 0 : _GM_getValue.games) || [];
     GM_setValue('IG-Owned', {
       time: new Date().getTime(),
-      games: _toConsumableArray(new Set([].concat(_toConsumableArray(allGames), _toConsumableArray(games))))
+      games: _toConsumableArray(new Set([].concat(_toConsumableArray(allGames), _toConsumableArray(games)))).filter(function (e) {
+        return e;
+      })
     });
   }
 
@@ -91,7 +93,9 @@ function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len 
 
       GM_setValue('IG-Owned', {
         time: new Date().getTime(),
-        games: _toConsumableArray(new Set([].concat(_toConsumableArray(_allGames), [window.location.pathname.replace('/', '')])))
+        games: _toConsumableArray(new Set([].concat(_toConsumableArray(_allGames), [window.location.pathname.replace('/', '')]))).filter(function (e) {
+          return e;
+        })
       });
     }
   }
@@ -116,8 +120,10 @@ function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len 
       return;
     }
 
-    var allGames = ((_GM_getValue3 = GM_getValue('IG-Owned')) === null || _GM_getValue3 === void 0 ? void 0 : _GM_getValue3.games) || [];
-    var igLink = $('a[href*=".indiegala.com/"]:not(".ig-checked")');
+    var allGames = (((_GM_getValue3 = GM_getValue('IG-Owned')) === null || _GM_getValue3 === void 0 ? void 0 : _GM_getValue3.games) || []).filter(function (e) {
+      return e;
+    });
+    var igLink = $('a[href*=".indiegala.com"]:not(".ig-checked")');
     if (igLink.length === 0) return;
     if (first === true) syncIgLib(false, false);
 
@@ -129,8 +135,9 @@ function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len 
         var el = _step.value;
         var $this = $(el).addClass('ig-checked');
         var href = $this.attr('href');
+        console.log(new URL(href).hostname.split('.')[0].toLowerCase());
 
-        if (/^https?:\/\/.+?\.indiegala\.com\/.+$/.test(href) && allGames.includes(new URL(href).pathname.replace(/\//g, '').toLowerCase())) {
+        if (/^https?:\/\/.+?\.indiegala\.com/.test(href) && (allGames.includes(new URL(href).pathname.replace(/\//g, '').toLowerCase()) || allGames.includes(new URL(href).hostname.split('.')[0].toLowerCase()))) {
           var itemContDiv = $this.parents('.item-cont');
 
           if (window.location.hostname === 'www.indiegala.com' && itemContDiv.length > 0) {
@@ -270,7 +277,9 @@ function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len 
               allGames = _toConsumableArray(new Set(allGames));
               GM_setValue('IG-Owned', {
                 time: new Date().getTime(),
-                games: allGames
+                games: allGames.filter(function (e) {
+                  return e;
+                })
               });
 
               if (notice) {
