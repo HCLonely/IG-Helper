@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name               IG-Owned
 // @namespace          IG-Owned
-// @version            1.1.3
+// @version            1.1.4
 // @description        indiegala 检测游戏是否已拥有
 // @author             HCLonely
 // @license            MIT
@@ -21,6 +21,7 @@
 // @grant              GM_listValues
 // @grant              GM_xmlhttpRequest
 // @grant              GM_registerMenuCommand
+// @grant              GM_cookie
 // @grant              unsafeWindow
 // @grant              window.open
 
@@ -128,12 +129,13 @@
       return []
     }
     let allGames = GM_getValue('IG-Owned')?.games || []
-    const [pages, games] = await getGames(1, notice)
+    const cookies = await getCookies();
+    const [pages, games] = await getGames(1, notice, cookies)
     if (pages === 0) return
     allGames = [...allGames, ...games]
     if (pages > 1 && update) {
       for (let i = 2; i <= pages; i++) {
-        const [, games] = await getGames(i, notice)
+        const [, games] = await getGames(i, notice, cookies)
         allGames = [...allGames, ...games]
       }
     }
@@ -147,7 +149,7 @@
     }
     return allGames
   }
-  function getGames(page, notice) {
+  function getGames(page, notice, cookies) {
     if (notice) {
       Swal.fire({
         title: '正在同步第' + page + '页...',
@@ -158,7 +160,10 @@
       url: 'https://www.indiegala.com/library/showcase/' + page,
       method: 'GET',
       timeout: 30000,
-      retry: 3
+      retry: 3,
+      headers: {
+        cookie: cookies
+      }
     })
       .then(response => {
         if (new URL(response.finalUrl).pathname === '/login') {
@@ -235,6 +240,17 @@
         }
         return [0, []]
       })
+  }
+  function getCookies() {
+    return new Promise((resolve, reject) => {
+      GM_cookie.list({ url: 'https://www.indiegala.com/library/showcase/1' }, function (cookies, error) {
+        if (!error) {
+          resolve(cookies.map((c) => `${c.name}=${c.value}`).join(';'));
+        } else {
+          reject(error);
+        }
+      });
+    });
   }
   GM_registerMenuCommand('同步游戏库', () => { syncIgLib(true, true) })
   GM_addStyle('.ig-owned{color:#ffffff !important;background:#5c8a00 !important;}')

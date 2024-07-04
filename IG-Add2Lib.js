@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name               IG-Add2Lib
 // @namespace          IG-Add2Lib
-// @version            1.0.8
+// @version            1.0.9
 // @description        indiegala 快速领取免费游戏
 // @author             HCLonely
 // @license            MIT
@@ -12,10 +12,12 @@
 // @downloadURL        https://raw.githubusercontent.com/HCLonely/IG-Helper/master/IG-Add2Lib.user.js
 
 // @include            *://keylol.com/*
+// @include            *://www.indiegala.com/*
 
 // @grant              GM_addStyle
 // @grant              GM_xmlhttpRequest
 // @grant              GM_registerMenuCommand
+// @grant              GM_cookie
 // @grant              unsafeWindow
 
 // @require            https://cdn.jsdelivr.net/npm/jquery@3.4.1/dist/jquery.slim.min.js
@@ -30,6 +32,9 @@
 
 /* global addToIndiegalaLibrary, syncIgLib */
 (function () {
+  if (window.location.host === 'www.indiegala.com') {
+    return;
+  }
   function addButton () {
     for (const el of $('a[href*=".indiegala.com/"]:not(".ig-add2lib")')) {
       const $this = $(el).addClass('ig-add2lib')
@@ -88,7 +93,8 @@
       responseType: 'json',
       nocache: true,
       headers: {
-        'content-type': 'application/json'
+        'content-type': 'application/json',
+        cookie: await getCookies()
       },
       timeout: 30000,
       retry: 3
@@ -170,6 +176,17 @@
       })
     }
   })
+  function getCookies() {
+    return new Promise((resolve, reject) => {
+      GM_cookie.list({ url: 'https://www.indiegala.com/library/showcase/1' }, function (cookies, error) {
+        if (!error) {
+          resolve(cookies.map((c) => `${c.name}=${c.value}`).join(';'));
+        } else {
+          reject(error);
+        }
+      });
+    });
+  }
   GM_addStyle('.add-to-library{margin-left:10px;}')
   addButton()
   const observer = new MutationObserver(addButton)

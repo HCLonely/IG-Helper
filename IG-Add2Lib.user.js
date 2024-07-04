@@ -21,7 +21,7 @@ function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len 
 // ==UserScript==
 // @name               IG-Add2Lib
 // @namespace          IG-Add2Lib
-// @version            1.0.8
+// @version            1.0.9
 // @description        indiegala 快速领取免费游戏
 // @author             HCLonely
 // @license            MIT
@@ -31,9 +31,11 @@ function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len 
 // @updateURL          https://raw.githubusercontent.com/HCLonely/IG-Helper/master/IG-Add2Lib.user.js
 // @downloadURL        https://raw.githubusercontent.com/HCLonely/IG-Helper/master/IG-Add2Lib.user.js
 // @include            *://keylol.com/*
+// @include            *://www.indiegala.com/*
 // @grant              GM_addStyle
 // @grant              GM_xmlhttpRequest
 // @grant              GM_registerMenuCommand
+// @grant              GM_cookie
 // @grant              unsafeWindow
 // @require            https://cdn.jsdelivr.net/npm/jquery@3.4.1/dist/jquery.slim.min.js
 // @require            https://cdn.jsdelivr.net/npm/regenerator-runtime@0.13.7/runtime.min.js
@@ -47,6 +49,10 @@ function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len 
 
 /* global addToIndiegalaLibrary, syncIgLib */
 (function () {
+  if (window.location.host === 'www.indiegala.com') {
+    return;
+  }
+
   function addButton() {
     var _iterator = _createForOfIteratorHelper($('a[href*=".indiegala.com/"]:not(".ig-add2lib")')),
         _step;
@@ -130,17 +136,27 @@ function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len 
                 text: href,
                 icon: 'info'
               });
-              return _context.abrupt("return", TM_request({
-                url: url,
+              _context.t0 = TM_request;
+              _context.t1 = url;
+              _context.next = 13;
+              return getCookies();
+
+            case 13:
+              _context.t2 = _context.sent;
+              _context.t3 = {
+                'content-type': 'application/json',
+                cookie: _context.t2
+              };
+              _context.t4 = {
+                url: _context.t1,
                 method: 'POST',
                 responseType: 'json',
                 nocache: true,
-                headers: {
-                  'content-type': 'application/json'
-                },
+                headers: _context.t3,
                 timeout: 30000,
                 retry: 3
-              }).then(function (response) {
+              };
+              return _context.abrupt("return", (0, _context.t0)(_context.t4).then(function (response) {
                 var _response$response, _response$response2, _response$response3, _response$response4;
 
                 if (((_response$response = response.response) === null || _response$response === void 0 ? void 0 : _response$response.status) === 'ok') {
@@ -208,7 +224,7 @@ function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len 
                 }
               }));
 
-            case 10:
+            case 17:
             case "end":
               return _context.stop();
           }
@@ -307,6 +323,23 @@ function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len 
       }
     }, _callee2, null, [[4, 20, 23, 26]]);
   })));
+
+  function getCookies() {
+    return new Promise(function (resolve, reject) {
+      GM_cookie.list({
+        url: 'https://www.indiegala.com/library/showcase/1'
+      }, function (cookies, error) {
+        if (!error) {
+          resolve(cookies.map(function (c) {
+            return "".concat(c.name, "=").concat(c.value);
+          }).join(';'));
+        } else {
+          reject(error);
+        }
+      });
+    });
+  }
+
   GM_addStyle('.add-to-library{margin-left:10px;}');
   addButton();
   var observer = new MutationObserver(addButton);

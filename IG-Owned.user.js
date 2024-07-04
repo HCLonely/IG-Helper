@@ -29,7 +29,7 @@ function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len 
 // ==UserScript==
 // @name               IG-Owned
 // @namespace          IG-Owned
-// @version            1.1.3
+// @version            1.1.4
 // @description        indiegala 检测游戏是否已拥有
 // @author             HCLonely
 // @license            MIT
@@ -47,6 +47,7 @@ function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len 
 // @grant              GM_listValues
 // @grant              GM_xmlhttpRequest
 // @grant              GM_registerMenuCommand
+// @grant              GM_cookie
 // @grant              unsafeWindow
 // @grant              window.open
 // @require            https://cdn.jsdelivr.net/npm/jquery@3.4.1/dist/jquery.min.js
@@ -161,6 +162,7 @@ function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len 
       var notice,
           update,
           allGames,
+          cookies,
           _yield$getGames,
           _yield$getGames2,
           pages,
@@ -228,52 +230,57 @@ function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len 
             case 5:
               allGames = ((_GM_getValue4 = GM_getValue('IG-Owned')) === null || _GM_getValue4 === void 0 ? void 0 : _GM_getValue4.games) || [];
               _context.next = 8;
-              return getGames(1, notice);
+              return getCookies();
 
             case 8:
+              cookies = _context.sent;
+              _context.next = 11;
+              return getGames(1, notice, cookies);
+
+            case 11:
               _yield$getGames = _context.sent;
               _yield$getGames2 = _slicedToArray(_yield$getGames, 2);
               pages = _yield$getGames2[0];
               games = _yield$getGames2[1];
 
               if (!(pages === 0)) {
-                _context.next = 14;
+                _context.next = 17;
                 break;
               }
 
               return _context.abrupt("return");
 
-            case 14:
+            case 17:
               allGames = [].concat(_toConsumableArray(allGames), _toConsumableArray(games));
 
               if (!(pages > 1 && update)) {
-                _context.next = 27;
+                _context.next = 30;
                 break;
               }
 
               i = 2;
 
-            case 17:
+            case 20:
               if (!(i <= pages)) {
-                _context.next = 27;
+                _context.next = 30;
                 break;
               }
 
-              _context.next = 20;
-              return getGames(i, notice);
+              _context.next = 23;
+              return getGames(i, notice, cookies);
 
-            case 20:
+            case 23:
               _yield$getGames3 = _context.sent;
               _yield$getGames4 = _slicedToArray(_yield$getGames3, 2);
               _games = _yield$getGames4[1];
               allGames = [].concat(_toConsumableArray(allGames), _toConsumableArray(_games));
 
-            case 24:
+            case 27:
               i++;
-              _context.next = 17;
+              _context.next = 20;
               break;
 
-            case 27:
+            case 30:
               allGames = _toConsumableArray(new Set(allGames));
               GM_setValue('IG-Owned', {
                 time: new Date().getTime(),
@@ -291,7 +298,7 @@ function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len 
 
               return _context.abrupt("return", allGames);
 
-            case 31:
+            case 34:
             case "end":
               return _context.stop();
           }
@@ -306,7 +313,7 @@ function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len 
     return syncIgLib;
   }();
 
-  function getGames(page, notice) {
+  function getGames(page, notice, cookies) {
     if (notice) {
       Swal.fire({
         title: '正在同步第' + page + '页...',
@@ -318,7 +325,10 @@ function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len 
       url: 'https://www.indiegala.com/library/showcase/' + page,
       method: 'GET',
       timeout: 30000,
-      retry: 3
+      retry: 3,
+      headers: {
+        cookie: cookies
+      }
     }).then(function (response) {
       if (new URL(response.finalUrl).pathname === '/login') {
         if (notice) {
@@ -415,6 +425,22 @@ function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len 
       }
 
       return [0, []];
+    });
+  }
+
+  function getCookies() {
+    return new Promise(function (resolve, reject) {
+      GM_cookie.list({
+        url: 'https://www.indiegala.com/library/showcase/1'
+      }, function (cookies, error) {
+        if (!error) {
+          resolve(cookies.map(function (c) {
+            return "".concat(c.name, "=").concat(c.value);
+          }).join(';'));
+        } else {
+          reject(error);
+        }
+      });
     });
   }
 
