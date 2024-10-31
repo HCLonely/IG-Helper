@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name               IG-Add2Lib
 // @namespace          IG-Add2Lib
-// @version            1.0.9
+// @version            1.1.0
 // @description        indiegala 快速领取免费游戏
 // @author             HCLonely
 // @license            MIT
@@ -51,10 +51,10 @@
       text: href,
       icon: 'info'
     })
-    const url = await TM_request({
+    const [url, csrf_token] = await TM_request({
       url: href,
       method: 'GET',
-      anonymous: true,
+      anonymous: false,
       timeout: 30000,
       retry: 3
     })
@@ -63,18 +63,19 @@
           console.error(response)
           return null
         }
-        const pageId = response.responseText.match(/dataToSend\.gala_page_id[\s]*?=[\s]*?'(.*?)';/)?.[1]
+        const pageId = response.responseText.match(/dataToSend\.(gala_page_)?id[\s]*?=[\s]*?'(.*?)';/)?.[2]
         if (!pageId) {
           console.error(response)
           return null
         }
-        return new URL(`/ajax/add-to-library/${pageId}/${new URL(href).pathname.replace(/\//g, '')}/${new URL(href).hostname.replace('.indiegala.com', '')}`, href).href
+        const csrf_token = response.responseText.match(/<input name="csrfmiddlewaretoken".+?value="(.+?)"/)?.[1]
+        return [new URL(`/developers/ajax/add-to-library/${pageId}/${new URL(href).pathname.replace(/\//g, '')}/${new URL(href).hostname.replace('.indiegala.com', '')}`, href).href, csrf_token]
       })
       .catch(error => {
         console.error(error)
         return null
       })
-    if (!url) {
+    if (!url || !csrf_token) {
       Swal.update({
         title: '获取入库链接失败！',
         text: href,
@@ -94,7 +95,7 @@
       nocache: true,
       headers: {
         'content-type': 'application/json',
-        cookie: await getCookies()
+        "X-CSRF-Token": csrf_token
       },
       timeout: 30000,
       retry: 3
