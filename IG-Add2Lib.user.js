@@ -18,7 +18,7 @@ function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length)
 // ==UserScript==
 // @name               IG-Add2Lib
 // @namespace          IG-Add2Lib
-// @version            1.1.0
+// @version            1.1.1
 // @description        indiegala 快速领取免费游戏
 // @author             HCLonely
 // @license            MIT
@@ -97,6 +97,19 @@ function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length)
               }
               var pageId = (_response$responseTex = response.responseText.match(/dataToSend\.(gala_page_)?id[\s]*?=[\s]*?'(.*?)';/)) === null || _response$responseTex === void 0 ? void 0 : _response$responseTex[2];
               if (!pageId) {
+                if (response.responseText.includes('loginRedirect')) {
+                  Swal.update({
+                    title: '请先登录！',
+                    text: 'https://www.indiegala.com/login',
+                    icon: 'error'
+                  });
+                  return null;
+                }
+                Swal.update({
+                  title: '获取入库Id失败！',
+                  text: href,
+                  icon: 'error'
+                });
                 console.error(response);
                 return null;
               }
@@ -225,7 +238,7 @@ function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length)
           _iterator3.s();
         case 6:
           if ((_step3 = _iterator3.n()).done) {
-            _context2.next = 18;
+            _context2.next = 16;
             break;
           }
           link = _step3.value;
@@ -234,29 +247,29 @@ function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length)
         case 10:
           result = _context2.sent;
           if (!(result === false)) {
-            _context2.next = 15;
+            _context2.next = 13;
             break;
           }
-          return _context2.abrupt("break", 18);
-        case 15:
+          return _context2.abrupt("break", 16);
+        case 13:
           if (!result) {
             failedLinks.push("<a href=\"".concat(link, "\" target=_blank\">").concat(link, "</a>"));
           }
-        case 16:
+        case 14:
           _context2.next = 6;
           break;
-        case 18:
-          _context2.next = 23;
+        case 16:
+          _context2.next = 21;
           break;
-        case 20:
-          _context2.prev = 20;
+        case 18:
+          _context2.prev = 18;
           _context2.t0 = _context2["catch"](4);
           _iterator3.e(_context2.t0);
-        case 23:
-          _context2.prev = 23;
+        case 21:
+          _context2.prev = 21;
           _iterator3.f();
-          return _context2.finish(23);
-        case 26:
+          return _context2.finish(21);
+        case 24:
           if (failedLinks.length === 0) {
             Swal.fire({
               title: '全部任务完成！',
@@ -269,11 +282,11 @@ function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length)
               html: failedLinks.join('<br/>')
             });
           }
-        case 27:
+        case 25:
         case "end":
           return _context2.stop();
       }
-    }, _callee2, null, [[4, 20, 23, 26]]);
+    }, _callee2, null, [[4, 18, 21, 24]]);
   })));
   function getCookies() {
     return new Promise(function (resolve, reject) {
