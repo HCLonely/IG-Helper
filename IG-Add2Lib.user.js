@@ -18,7 +18,7 @@ function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length)
 // ==UserScript==
 // @name               IG-Add2Lib
 // @namespace          IG-Add2Lib
-// @version            1.1.1
+// @version            1.1.2
 // @description        indiegala 快速领取免费游戏
 // @author             HCLonely
 // @license            MIT
@@ -147,6 +147,7 @@ function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length)
               nocache: true,
               headers: {
                 'content-type': 'application/json',
+                'X-CSRFToken': csrf_token,
                 "X-CSRF-Token": csrf_token
               },
               timeout: 30000,
